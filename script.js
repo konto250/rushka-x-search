@@ -3,6 +3,7 @@ const SETTINGS_COOKIE_KEY = "rushka_x_search_settings";
 const SETTINGS_COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
 
 const elements = {
+    enableDateRange: document.getElementById("enableDateRange"),
     dateRange: document.getElementById("dateRange"),
     mediaOnly: document.getElementById("mediaOnly"),
     excludeQuote: document.getElementById("excludeQuote"),
@@ -36,6 +37,7 @@ function getCookie(name) {
 
 function collectSettings() {
     return {
+        enableDateRange: elements.enableDateRange.checked,
         dateRange: elements.dateRange.value,
         mediaOnly: elements.mediaOnly.checked,
         excludeQuote: elements.excludeQuote.checked,
@@ -57,6 +59,7 @@ function restoreSettingsFromCookie() {
 
     try {
         const settings = JSON.parse(raw);
+        elements.enableDateRange.checked = settings.enableDateRange !== false;
         elements.dateRange.value = typeof settings.dateRange === "string" ? settings.dateRange : elements.dateRange.value;
         elements.mediaOnly.checked = Boolean(settings.mediaOnly);
         elements.excludeQuote.checked = Boolean(settings.excludeQuote);
@@ -114,7 +117,7 @@ function getSinceDateValue(rangeKey) {
 
 function buildQuery() {
     const parts = [BASE_QUERY];
-    const sinceDate = getSinceDateValue(elements.dateRange.value);
+    const sinceDate = elements.enableDateRange.checked ? getSinceDateValue(elements.dateRange.value) : "";
 
     if (sinceDate) parts.push(`since:${sinceDate}`);
 
@@ -142,6 +145,10 @@ function updateExcludeUsersState() {
     elements.excludeUsers.disabled = !enabled;
     elements.excludeUsersWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
     elements.excludeUsersWrap.classList.toggle("disabled", !enabled);
+}
+
+function updateDateRangeState() {
+    elements.dateRange.disabled = !elements.enableDateRange.checked;
 }
 
 function updateOutput() {
@@ -174,6 +181,7 @@ async function copyQuery() {
 }
 
 [
+    elements.enableDateRange,
     elements.dateRange,
     elements.mediaOnly,
     elements.excludeQuote,
@@ -182,6 +190,7 @@ async function copyQuery() {
     elements.enableExcludeUsers
 ].forEach((checkbox) => checkbox.addEventListener("change", updateOutput));
 
+elements.enableDateRange.addEventListener("change", updateDateRangeState);
 elements.enableExcludeUsers.addEventListener("change", updateExcludeUsersState);
 
 elements.excludeUsers.addEventListener("input", updateOutput);
@@ -189,5 +198,6 @@ elements.copyButton.addEventListener("click", copyQuery);
 elements.openXLink.addEventListener("click", saveSettingsToCookie);
 
 restoreSettingsFromCookie();
+updateDateRangeState();
 updateExcludeUsersState();
 updateOutput();
