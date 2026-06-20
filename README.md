@@ -2,6 +2,8 @@
 
 ルーシュカ関連のX検索式をブラウザ上で組み立てる静的アプリです。
 
+GitHubリポジトリ: https://github.com/konto250/rushka-x-search
+
 基本検索式として、以下をベースに検索条件を追加できます。
 
 ```text

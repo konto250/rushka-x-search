@@ -35,6 +35,21 @@ h1 {
     color: var(--muted);
 }
 
+.repo-link-wrap {
+    margin: 0 0 20px;
+    color: var(--muted);
+}
+
+.repo-link {
+    color: var(--accent);
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.repo-link:hover {
+    color: var(--accent-hover);
+}
+
 .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -113,7 +128,7 @@ textarea {
 }
 
 button,
-a {
+.button-row a {
     appearance: none;
     border: 0;
     border-radius: 10px;
@@ -132,12 +147,12 @@ button:hover {
     background: var(--accent-hover);
 }
 
-a {
+.button-row a {
     background: #111827;
     color: #ffffff;
 }
 
-a:hover {
+.button-row a:hover {
     background: #1f2937;
 }
 
