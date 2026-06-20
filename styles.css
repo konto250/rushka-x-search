@@ -19,6 +19,42 @@ body {
     color: var(--text);
 }
 
+.repo-link-wrap {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+}
+
+.repo-link-wrap:hover {
+    color: var(--accent-hover);
+    border-color: #bfd3f2;
+}
+
+.repo-link-label {
+    line-height: 1;
+}
+
+.repo-link-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    flex: 0 0 auto;
+}
+
 .container {
     max-width: 860px;
     margin: 40px auto;
@@ -33,21 +69,6 @@ h1 {
 .subtitle {
     margin: 0 0 20px;
     color: var(--muted);
-}
-
-.repo-link-wrap {
-    margin: 0 0 20px;
-    color: var(--muted);
-}
-
-.repo-link {
-    color: var(--accent);
-    text-decoration: underline;
-    font-weight: 600;
-}
-
-.repo-link:hover {
-    color: var(--accent-hover);
 }
 
 .card {
@@ -164,8 +185,15 @@ button:hover {
 }
 
 @media (max-width: 600px) {
+    .repo-link-wrap {
+        top: 12px;
+        right: 12px;
+        padding: 9px 12px;
+        font-size: 0.95rem;
+    }
+
     .container {
-        margin-top: 20px;
+        margin-top: 72px;
     }
 
     h1 {
