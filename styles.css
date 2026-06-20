@@ -124,6 +124,17 @@ input[type="text"] {
     font-size: 1rem;
 }
 
+select {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: #ffffff;
+    color: var(--text);
+}
+
 small {
     display: block;
     margin-top: 8px;

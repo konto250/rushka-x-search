@@ -3,6 +3,7 @@ const SETTINGS_COOKIE_KEY = "rushka_x_search_settings";
 const SETTINGS_COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
 
 const elements = {
+    dateRange: document.getElementById("dateRange"),
     mediaOnly: document.getElementById("mediaOnly"),
     excludeQuote: document.getElementById("excludeQuote"),
     excludeRetweet: document.getElementById("excludeRetweet"),
@@ -35,6 +36,7 @@ function getCookie(name) {
 
 function collectSettings() {
     return {
+        dateRange: elements.dateRange.value,
         mediaOnly: elements.mediaOnly.checked,
         excludeQuote: elements.excludeQuote.checked,
         excludeRetweet: elements.excludeRetweet.checked,
@@ -55,6 +57,7 @@ function restoreSettingsFromCookie() {
 
     try {
         const settings = JSON.parse(raw);
+        elements.dateRange.value = typeof settings.dateRange === "string" ? settings.dateRange : elements.dateRange.value;
         elements.mediaOnly.checked = Boolean(settings.mediaOnly);
         elements.excludeQuote.checked = Boolean(settings.excludeQuote);
         elements.excludeRetweet.checked = Boolean(settings.excludeRetweet);
@@ -70,8 +73,50 @@ function sanitizeUsername(raw) {
     return raw.replace(/^@+/, "").trim();
 }
 
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function getSinceDateValue(rangeKey) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const rangeDate = new Date(today);
+
+    switch (rangeKey) {
+        case "1d":
+            rangeDate.setDate(rangeDate.getDate() - 1);
+            break;
+        case "3d":
+            rangeDate.setDate(rangeDate.getDate() - 3);
+            break;
+        case "7d":
+            rangeDate.setDate(rangeDate.getDate() - 7);
+            break;
+        case "14d":
+            rangeDate.setDate(rangeDate.getDate() - 14);
+            break;
+        case "1m":
+            rangeDate.setMonth(rangeDate.getMonth() - 1);
+            break;
+        case "2m":
+            rangeDate.setMonth(rangeDate.getMonth() - 2);
+            break;
+        default:
+            return "";
+    }
+
+    return formatDate(rangeDate);
+}
+
 function buildQuery() {
     const parts = [BASE_QUERY];
+    const sinceDate = getSinceDateValue(elements.dateRange.value);
+
+    if (sinceDate) parts.push(`since:${sinceDate}`);
 
     if (elements.mediaOnly.checked) parts.push("filter:media");
     if (elements.excludeQuote.checked) parts.push("-filter:quote");
@@ -129,6 +174,7 @@ async function copyQuery() {
 }
 
 [
+    elements.dateRange,
     elements.mediaOnly,
     elements.excludeQuote,
     elements.excludeRetweet,

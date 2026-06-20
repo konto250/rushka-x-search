@@ -40,6 +40,18 @@
         <section class="card">
             <h2>オプション</h2>
             <div class="options-grid">
+                <div class="option-input-wrap">
+                    <label for="dateRange">検索期間（`since:yyyy-mm-dd`）</label>
+                    <select id="dateRange">
+                        <option value="1d">過去1日</option>
+                        <option value="3d">過去3日</option>
+                        <option value="7d" selected>過去1週間</option>
+                        <option value="14d">過去2週間</option>
+                        <option value="1m">過去1ヶ月</option>
+                        <option value="2m">過去2ヶ月</option>
+                    </select>
+                    <small>本日を基準に開始日を計算して `since:yyyy-mm-dd` を追加します</small>
+                </div>
                 <label><input type="checkbox" id="mediaOnly" /> メディアのみ（`filter:media`）</label>
                 <label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（`-filter:quote`）</label>
                 <label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（`-filter:retweet`）</label>
