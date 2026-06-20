@@ -120,8 +120,6 @@ function buildQuery() {
     const parts = [BASE_QUERY];
     const sinceDate = elements.enableDateRange.checked ? getSinceDateValue(elements.dateRange.value) : "";
 
-    if (sinceDate) parts.push(`since:${sinceDate}`);
-
     if (elements.mediaOnly.checked) parts.push("filter:media");
     if (elements.excludeQuote.checked) parts.push("-filter:quote");
     if (elements.excludeRetweet.checked) parts.push("-filter:retweet");
@@ -137,6 +135,8 @@ function buildQuery() {
             parts.push(`-from:${user}`);
         });
     }
+
+    if (sinceDate) parts.push(`since:${sinceDate}`);
 
     return parts.join(" ");
 }
