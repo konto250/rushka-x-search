@@ -40,8 +40,18 @@
         <section class="card">
             <h2>オプション</h2>
             <div class="options-grid">
-                <div class="option-input-wrap">
-                    <label><input type="checkbox" id="enableDateRange" checked /> 日付を指定する（`since:yyyy-mm-dd`）</label>
+                <label><input type="checkbox" id="mediaOnly" /> メディアのみ（`filter:media`）</label>
+                <label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（`-filter:quote`）</label>
+                <label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（`-filter:retweet`）</label>
+                <label><input type="checkbox" id="excludeReplies" /> リプライを除外（`-filter:replies`）</label>
+                <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（`-from:user`）</label>
+                <div id="excludeUsersWrap" class="option-input-wrap" aria-hidden="true">
+                    <label for="excludeUsers">除外ユーザー（スペース区切り）</label>
+                    <input id="excludeUsers" type="text" placeholder="user1 user2" autocomplete="off" disabled />
+                    <small>例: `-from:user1 -from:user2` の形式で追加されます</small>
+                </div>
+                <label><input type="checkbox" id="enableDateRange" checked /> 日付を指定する（`since:yyyy-mm-dd`）</label>
+                <div id="dateRangeWrap" class="option-input-wrap" aria-hidden="false">
                     <label for="dateRange">検索期間</label>
                     <select id="dateRange">
                         <option value="1d">過去1日</option>
@@ -52,16 +62,6 @@
                         <option value="2m">過去2ヶ月</option>
                     </select>
                     <small>本日を基準に開始日を計算して `since:yyyy-mm-dd` を追加します</small>
-                </div>
-                <label><input type="checkbox" id="mediaOnly" /> メディアのみ（`filter:media`）</label>
-                <label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（`-filter:quote`）</label>
-                <label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（`-filter:retweet`）</label>
-                <label><input type="checkbox" id="excludeReplies" /> リプライを除外（`-filter:replies`）</label>
-                <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（`-from:user`）</label>
-                <div id="excludeUsersWrap" class="option-input-wrap" aria-hidden="true">
-                    <label for="excludeUsers">除外ユーザー（スペース区切り）</label>
-                    <input id="excludeUsers" type="text" placeholder="user1 user2" autocomplete="off" disabled />
-                    <small>例: `-from:user1 -from:user2` の形式で追加されます</small>
                 </div>
             </div>
         </section>

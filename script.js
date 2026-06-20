@@ -4,6 +4,7 @@ const SETTINGS_COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
 
 const elements = {
     enableDateRange: document.getElementById("enableDateRange"),
+    dateRangeWrap: document.getElementById("dateRangeWrap"),
     dateRange: document.getElementById("dateRange"),
     mediaOnly: document.getElementById("mediaOnly"),
     excludeQuote: document.getElementById("excludeQuote"),
@@ -148,7 +149,10 @@ function updateExcludeUsersState() {
 }
 
 function updateDateRangeState() {
-    elements.dateRange.disabled = !elements.enableDateRange.checked;
+    const enabled = elements.enableDateRange.checked;
+    elements.dateRange.disabled = !enabled;
+    elements.dateRangeWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
+    elements.dateRangeWrap.classList.toggle("disabled", !enabled);
 }
 
 function updateOutput() {
