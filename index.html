@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ルーシュカ X検索ビルダー</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <main class="container">
+        <h1>ルーシュカ X検索ビルダー</h1>
+        <p class="subtitle">Xの検索式を作成して、コピーまたはXで直接検索できます。</p>
+
+        <section class="card">
+            <h2>基本検索式</h2>
+            <div class="readonly">(#ルーシュカ OR ルーシュカ)</div>
+        </section>
+
+        <section class="card">
+            <h2>オプション</h2>
+            <div class="options-grid">
+                <label><input type="checkbox" id="mediaOnly" /> メディアのみ（`filter:media`）</label>
+                <label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（`-filter:quote`）</label>
+                <label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（`-filter:retweet`）</label>
+                <label><input type="checkbox" id="excludeReplies" /> リプライを除外（`-filter:replies`）</label>
+                <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（`-from:user`）</label>
+                <div id="excludeUsersWrap" class="option-input-wrap" aria-hidden="true">
+                    <label for="excludeUsers">除外ユーザー（スペース区切り）</label>
+                    <input id="excludeUsers" type="text" placeholder="user1 user2" autocomplete="off" disabled />
+                    <small>例: `-from:user1 -from:user2` の形式で追加されます</small>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>生成された検索式</h2>
+            <textarea id="queryOutput" readonly></textarea>
+            <div class="button-row">
+                <button id="copyButton" type="button">検索式をコピー</button>
+                <a id="openXLink" href="#" target="_blank" rel="noopener noreferrer">Xで開く（最新）</a>
+            </div>
+            <p id="copyStatus" class="status" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
