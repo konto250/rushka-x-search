@@ -1,4 +1,6 @@
 const BASE_QUERY = "(#ルーシュカ OR ルーシュカ)";
+const SETTINGS_COOKIE_KEY = "rushka_x_search_settings";
+const SETTINGS_COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
 
 const elements = {
     mediaOnly: document.getElementById("mediaOnly"),
@@ -13,6 +15,56 @@ const elements = {
     copyStatus: document.getElementById("copyStatus"),
     openXLink: document.getElementById("openXLink")
 };
+
+function setCookie(name, value, maxAgeSeconds) {
+    document.cookie = `${name}=${encodeURIComponent(value)}; max-age=${maxAgeSeconds}; path=/; samesite=lax`;
+}
+
+function getCookie(name) {
+    const cookieName = `${name}=`;
+    const cookies = document.cookie ? document.cookie.split("; ") : [];
+
+    for (const cookie of cookies) {
+        if (cookie.startsWith(cookieName)) {
+            return decodeURIComponent(cookie.slice(cookieName.length));
+        }
+    }
+
+    return null;
+}
+
+function collectSettings() {
+    return {
+        mediaOnly: elements.mediaOnly.checked,
+        excludeQuote: elements.excludeQuote.checked,
+        excludeRetweet: elements.excludeRetweet.checked,
+        excludeReplies: elements.excludeReplies.checked,
+        enableExcludeUsers: elements.enableExcludeUsers.checked,
+        excludeUsers: elements.excludeUsers.value
+    };
+}
+
+function saveSettingsToCookie() {
+    const settings = collectSettings();
+    setCookie(SETTINGS_COOKIE_KEY, JSON.stringify(settings), SETTINGS_COOKIE_MAX_AGE);
+}
+
+function restoreSettingsFromCookie() {
+    const raw = getCookie(SETTINGS_COOKIE_KEY);
+    if (!raw) return;
+
+    try {
+        const settings = JSON.parse(raw);
+        elements.mediaOnly.checked = Boolean(settings.mediaOnly);
+        elements.excludeQuote.checked = Boolean(settings.excludeQuote);
+        elements.excludeRetweet.checked = Boolean(settings.excludeRetweet);
+        elements.excludeReplies.checked = Boolean(settings.excludeReplies);
+        elements.enableExcludeUsers.checked = Boolean(settings.enableExcludeUsers);
+        elements.excludeUsers.value = typeof settings.excludeUsers === "string" ? settings.excludeUsers : "";
+    } catch {
+        // Cookie may be manually edited or from an old format; ignore and continue.
+    }
+}
 
 function sanitizeUsername(raw) {
     return raw.replace(/^@+/, "").trim();
@@ -58,6 +110,7 @@ function updateOutput() {
 }
 
 async function copyQuery() {
+    saveSettingsToCookie();
     const query = elements.queryOutput.value;
 
     try {
@@ -87,6 +140,8 @@ elements.enableExcludeUsers.addEventListener("change", updateExcludeUsersState);
 
 elements.excludeUsers.addEventListener("input", updateOutput);
 elements.copyButton.addEventListener("click", copyQuery);
+elements.openXLink.addEventListener("click", saveSettingsToCookie);
 
+restoreSettingsFromCookie();
 updateExcludeUsersState();
 updateOutput();
