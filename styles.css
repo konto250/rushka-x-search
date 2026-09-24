@@ -110,6 +110,18 @@ h2 {
     background: #f8fafc;
 }
 
+.follows-option {
+    grid-column: 1 / -1;
+}
+
+.follows-option label {
+    white-space: nowrap;
+}
+
+.follows-short {
+    display: none;
+}
+
 .date-option {
     grid-column: 1 / -1;
 }
@@ -480,4 +492,18 @@ button:disabled,
         grid-template-columns: 1fr;
     }
 
+}
+
+@media (max-width: 480px) {
+    .follows-option label {
+        font-size: 0.875rem;
+    }
+
+    .follows-full {
+        display: none;
+    }
+
+    .follows-short {
+        display: inline;
+    }
 }
