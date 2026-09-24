@@ -46,44 +46,50 @@
         <section class="card">
             <h2>オプション</h2>
             <div class="options-grid">
-                <label><input type="checkbox" id="mediaOnly" /> メディアのみ（<code>filter:media</code>）</label>
-                <label><input type="checkbox" id="followsOnly" /> フォロー中のユーザーのみ（<code>filter:follows</code>）</label>
-                <label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（<code>-filter:quote</code>）</label>
-                <label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（<code>-filter:retweet</code>）</label>
-                <label><input type="checkbox" id="excludeReplies" /> リプライを除外（<code>-filter:replies</code>）</label>
-                <label><input type="checkbox" id="enableIncludeUsers" /> 指定ユーザーのみ検索（<code>from:@user</code>）</label>
-                <div id="includeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
-                    <input id="includeUsers" type="text" aria-label="対象ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力" autocomplete="off" disabled />
-                </div>
-                <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（<code>-from:@user</code>）</label>
-                <div id="excludeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
-                    <input id="excludeUsers" type="text" aria-label="除外ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力" autocomplete="off" disabled />
-                </div>
-                <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> / <code>until:</code>）</label>
-                <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true" hidden>
-                    <label for="dateMode">指定方法</label>
-                    <select id="dateMode" disabled>
-                        <option value="fixed">カレンダーで期間を指定</option>
-                        <option value="relative">過去の日数で指定</option>
-                    </select>
-                    <div id="relativeDateWrap" hidden>
-                        <label for="relativeDays">過去何日（今日を含む）</label>
-                        <input id="relativeDays" type="number" min="1" step="1" value="7" disabled />
-                        <p id="relativeDateSummary" class="selected-date-range" aria-live="polite"></p>
+                <div class="option-group"><label><input type="checkbox" id="mediaOnly" /> メディアのみ（<code>filter:media</code>）</label></div>
+                <div class="option-group"><label><input type="checkbox" id="followsOnly" /> フォロー中のユーザーのみ（<code>filter:follows</code>）</label></div>
+                <div class="option-group"><label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（<code>-filter:quote</code>）</label></div>
+                <div class="option-group"><label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（<code>-filter:retweet</code>）</label></div>
+                <div class="option-group"><label><input type="checkbox" id="excludeReplies" /> リプライを除外（<code>-filter:replies</code>）</label></div>
+                <div class="option-group">
+                    <label><input type="checkbox" id="enableIncludeUsers" /> 指定ユーザーのみ検索（<code>from:@user</code>）</label>
+                    <div id="includeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
+                        <input id="includeUsers" type="text" aria-label="対象ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力" autocomplete="off" disabled />
                     </div>
-                    <div id="fixedDateWrap">
-                        <input id="sinceDate" type="hidden" />
-                        <input id="untilDate" type="hidden" />
-                        <div class="calendar-header">
-                            <button id="previousMonth" type="button" class="calendar-nav" aria-label="前の月" disabled>‹</button>
-                            <strong id="calendarMonthLabel"></strong>
-                            <button id="nextMonth" type="button" class="calendar-nav" aria-label="次の月" disabled>›</button>
+                </div>
+                <div class="option-group">
+                    <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（<code>-from:@user</code>）</label>
+                    <div id="excludeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
+                        <input id="excludeUsers" type="text" aria-label="除外ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力" autocomplete="off" disabled />
+                    </div>
+                </div>
+                <div class="option-group date-option">
+                    <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> / <code>until:</code>）</label>
+                    <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true" hidden>
+                        <label for="dateMode">指定方法</label>
+                        <select id="dateMode" disabled>
+                            <option value="fixed">カレンダーで期間を指定</option>
+                            <option value="relative">過去の日数で指定</option>
+                        </select>
+                        <div id="relativeDateWrap" hidden>
+                            <label for="relativeDays">過去何日（今日を含む）</label>
+                            <input id="relativeDays" type="number" min="1" step="1" value="7" disabled />
+                            <p id="relativeDateSummary" class="selected-date-range" aria-live="polite"></p>
                         </div>
-                        <div class="calendar-weekdays" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
-                        <div id="calendarGrid" class="calendar-grid" aria-label="検索期間のカレンダー"></div>
-                        <p id="selectedDateRange" class="selected-date-range" aria-live="polite">期間を選択してください。</p>
-                        <button id="clearDateRange" type="button" class="calendar-clear" disabled>期間をクリア</button>
-                        <small>開始日から終了日までドラッグしてください。長い期間は開始日をクリックし、月を移動して終了日をクリックできます。終了日も検索対象に含まれます。</small>
+                        <div id="fixedDateWrap">
+                            <input id="sinceDate" type="hidden" />
+                            <input id="untilDate" type="hidden" />
+                            <div class="calendar-header">
+                                <button id="previousMonth" type="button" class="calendar-nav" aria-label="前の月" disabled>‹</button>
+                                <strong id="calendarMonthLabel"></strong>
+                                <button id="nextMonth" type="button" class="calendar-nav" aria-label="次の月" disabled>›</button>
+                            </div>
+                            <div class="calendar-weekdays" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
+                            <div id="calendarGrid" class="calendar-grid" aria-label="検索期間のカレンダー"></div>
+                            <p id="selectedDateRange" class="selected-date-range" aria-live="polite">期間を選択してください。</p>
+                            <button id="clearDateRange" type="button" class="calendar-clear" disabled>期間をクリア</button>
+                            <small>開始日から終了日までドラッグしてください。長い期間は開始日をクリックし、月を移動して終了日をクリックできます。終了日も検索対象に含まれます。</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -107,15 +113,15 @@
             <p id="historyStatus" class="status" aria-live="polite"></p>
         </section>
 
-        <section class="card">
-            <h2>ブックマークレット</h2>
+        <details class="card bookmarklet-panel">
+            <summary>ブックマークレット</summary>
             <p>下のリンクをブックマークバーにドラッグすると、現在の条件でX検索を開けます。過去の日数を指定した場合は、実行した日の開始日を計算します。</p>
             <a id="bookmarkletLink" class="bookmarklet-link" draggable="true">Xで検索</a>
             <label for="bookmarkletOutput">ブックマークレット用JavaScript</label>
             <textarea id="bookmarkletOutput" readonly></textarea>
             <button id="copyBookmarkletButton" type="button">JavaScriptをコピー</button>
             <p id="bookmarkletStatus" class="status" aria-live="polite"></p>
-        </section>
+        </details>
     </main>
 
     <script src="script.js"></script>
