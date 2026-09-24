@@ -7,6 +7,11 @@ const elements = {
     searchTerms: document.getElementById("searchTerms"),
     enableDateRange: document.getElementById("enableDateRange"),
     dateRangeWrap: document.getElementById("dateRangeWrap"),
+    dateMode: document.getElementById("dateMode"),
+    fixedDateWrap: document.getElementById("fixedDateWrap"),
+    relativeDateWrap: document.getElementById("relativeDateWrap"),
+    relativeDays: document.getElementById("relativeDays"),
+    relativeDateSummary: document.getElementById("relativeDateSummary"),
     sinceDate: document.getElementById("sinceDate"),
     untilDate: document.getElementById("untilDate"),
     previousMonth: document.getElementById("previousMonth"),
@@ -69,6 +74,8 @@ function collectSettings() {
     return {
         searchTerms: elements.searchTerms.value,
         enableDateRange: elements.enableDateRange.checked,
+        dateMode: elements.dateMode.value,
+        relativeDays: elements.relativeDays.value,
         sinceDate: elements.sinceDate.value,
         untilDate: elements.untilDate.value,
         mediaOnly: elements.mediaOnly.checked,
@@ -93,7 +100,9 @@ function saveSettingsToCookie() {
 function applySettings(settings) {
     if (!settings || typeof settings !== "object") return;
     elements.searchTerms.value = typeof settings.searchTerms === "string" ? settings.searchTerms : "";
-    elements.enableDateRange.checked = Boolean(settings.enableDateRange && ("sinceDate" in settings || "untilDate" in settings));
+    elements.enableDateRange.checked = Boolean(settings.enableDateRange && (settings.dateMode === "relative" || "sinceDate" in settings || "untilDate" in settings));
+    elements.dateMode.value = settings.dateMode === "relative" ? "relative" : "fixed";
+    elements.relativeDays.value = typeof settings.relativeDays === "string" ? settings.relativeDays : "7";
     elements.sinceDate.value = typeof settings.sinceDate === "string" ? settings.sinceDate : "";
     elements.untilDate.value = typeof settings.untilDate === "string" ? settings.untilDate : "";
     const shownDate = elements.sinceDate.value || (elements.untilDate.value ? addDays(elements.untilDate.value, -1) : "");
@@ -151,6 +160,21 @@ function addDays(value, count) {
     return date.toISOString().slice(0, 10);
 }
 
+function formatLocalDate(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function getRelativeDateRange(now = new Date()) {
+    const days = Number(elements.relativeDays.value);
+    if (!Number.isSafeInteger(days) || days < 1 || elements.relativeDays.value.trim() === "") return null;
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const end = new Date(start);
+    start.setDate(start.getDate() - days + 1);
+    end.setDate(end.getDate() + 1);
+    if (Number.isNaN(start.getTime()) || start.getFullYear() < 1) return null;
+    return { since: formatLocalDate(start), until: formatLocalDate(end) };
+}
+
 function monthFromDate(value) {
     const date = parseDate(value);
     return date ? new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)) : calendarMonth;
@@ -174,7 +198,7 @@ function renderCalendar() {
         day.textContent = String(date.getUTCDate());
         day.setAttribute("aria-label", `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日`);
         day.classList.toggle("outside-month", date.getUTCMonth() !== month);
-        day.disabled = !elements.enableDateRange.checked;
+        day.disabled = !elements.enableDateRange.checked || elements.dateMode.value !== "fixed";
         elements.calendarGrid.append(day);
     }
 
@@ -266,7 +290,7 @@ function handleCalendarPointerCancel(event) {
 }
 
 function handleCalendarPointerDown(event) {
-    if (!elements.enableDateRange.checked || dragPointerId !== null) return;
+    if (!elements.enableDateRange.checked || elements.dateMode.value !== "fixed" || dragPointerId !== null) return;
     const day = event.target.closest?.("[data-date]");
     if (!day || !elements.calendarGrid.contains(day)) return;
     event.preventDefault();
@@ -279,11 +303,11 @@ function handleCalendarPointerDown(event) {
     window.addEventListener("pointercancel", handleCalendarPointerCancel);
 }
 
-function buildQuery() {
+function buildQuery(includeDate = true, now = new Date()) {
     const parts = [];
     const searchTerms = elements.searchTerms.value.trim();
     if (searchTerms) {
-        const hasScopedFilters = elements.enableIncludeUsers.checked || (elements.enableExcludeKeywords.checked && elements.excludeKeywords.value.trim());
+        const hasScopedFilters = elements.enableIncludeUsers.checked || (elements.enableExcludeKeywords.checked && elements.excludeKeywords.value.trim()) || elements.enableDateRange.checked;
         const needsGrouping = hasScopedFilters && /\bOR\b/.test(searchTerms);
         parts.push(needsGrouping ? `(${searchTerms})` : searchTerms);
     }
@@ -309,17 +333,18 @@ function buildQuery() {
         });
     }
 
-    if (elements.enableDateRange.checked) {
-        if (elements.sinceDate.value) parts.push(`since:${elements.sinceDate.value}`);
-        if (elements.untilDate.value) parts.push(`until:${elements.untilDate.value}`);
-    }
-
     if (elements.enableExcludeKeywords.checked) {
         elements.excludeKeywords.value
             .split(/\r?\n/)
             .map(excludedKeywordFilter)
             .filter(Boolean)
             .forEach((filter) => parts.push(filter));
+    }
+
+    if (includeDate && elements.enableDateRange.checked) {
+        const dates = elements.dateMode.value === "relative" ? getRelativeDateRange(now) : { since: elements.sinceDate.value, until: elements.untilDate.value };
+        if (dates?.since) parts.push(`since:${dates.since}`);
+        if (dates?.until) parts.push(`until:${dates.until}`);
     }
 
     return parts.join(" ");
@@ -334,15 +359,20 @@ function updateExcludeUsersState() {
 
 function updateDateRangeState() {
     const enabled = elements.enableDateRange.checked;
-    if (!enabled && dragPointerId !== null) {
+    const fixed = elements.dateMode.value === "fixed";
+    if ((!enabled || !fixed) && dragPointerId !== null) {
         stopCalendarDrag();
         dragStart = null;
         dragEnd = null;
     }
-    if (!enabled) pendingRangeStart = null;
-    elements.previousMonth.disabled = !enabled;
-    elements.nextMonth.disabled = !enabled;
-    elements.clearDateRange.disabled = !enabled;
+    if (!enabled || !fixed) pendingRangeStart = null;
+    elements.dateMode.disabled = !enabled;
+    elements.fixedDateWrap.hidden = !fixed;
+    elements.relativeDateWrap.hidden = fixed;
+    elements.relativeDays.disabled = !enabled || fixed;
+    elements.previousMonth.disabled = !enabled || !fixed;
+    elements.nextMonth.disabled = !enabled || !fixed;
+    elements.clearDateRange.disabled = !enabled || !fixed;
     elements.dateRangeWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
     elements.dateRangeWrap.classList.toggle("disabled", !enabled);
     renderCalendar();
@@ -355,17 +385,35 @@ function updateExcludeKeywordsState() {
     elements.excludeKeywordsWrap.classList.toggle("disabled", !enabled);
 }
 
+function buildBookmarklet(xUrl) {
+    if (!elements.enableDateRange.checked || elements.dateMode.value !== "relative") {
+        return `javascript:(()=>{window.open(${JSON.stringify(xUrl)},"_blank","noopener")})()`;
+    }
+
+    const baseQuery = JSON.stringify(buildQuery(false));
+    const daysBeforeToday = Number(elements.relativeDays.value) - 1;
+    return `javascript:(()=>{const t=new Date();t.setHours(0,0,0,0);const s=new Date(t);s.setDate(s.getDate()-${daysBeforeToday});const u=new Date(t);u.setDate(u.getDate()+1);const f=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const q=[${baseQuery},"since:"+f(s),"until:"+f(u)].filter(Boolean).join(" ");const x=new URL("https://x.com/search");x.searchParams.set("q",q);x.searchParams.set("f","live");window.open(x.toString(),"_blank","noopener")})()`;
+}
+
 function updateOutput() {
-    const query = buildQuery();
+    const now = new Date();
+    const relative = elements.enableDateRange.checked && elements.dateMode.value === "relative";
+    const relativeDates = relative ? getRelativeDateRange(now) : null;
+    elements.relativeDateSummary.textContent = relativeDates
+        ? `現在の検索期間: ${relativeDates.since} ～ ${addDays(relativeDates.until, -1)}`
+        : "";
+    const query = buildQuery(true, now);
     elements.queryOutput.value = query;
     const since = elements.sinceDate.value;
     const until = elements.untilDate.value;
-    const invalidRange = elements.enableDateRange.checked && since && until && since >= until;
+    const invalidRange = elements.enableDateRange.checked && !relative && since && until && since >= until;
+    const invalidRelativeDays = relative && !relativeDates;
     const missingIncludeUsers = elements.enableIncludeUsers.checked && parseUsernames(elements.includeUsers.value).length === 0;
-    const invalid = !query || invalidRange || missingIncludeUsers;
+    const invalid = !query || invalidRange || missingIncludeUsers || invalidRelativeDays;
     elements.validationStatus.textContent = [
         missingIncludeUsers ? "対象ユーザーを入力してください。" : "",
-        invalidRange ? "終了日は開始日より後の日付を指定してください。" : ""
+        invalidRange ? "終了日は開始日より後の日付を指定してください。" : "",
+        invalidRelativeDays ? "過去の日数は有効な正の整数で指定してください。" : ""
     ].filter(Boolean).join(" ");
     elements.copyButton.disabled = invalid;
     elements.copyBookmarkletButton.disabled = invalid;
@@ -379,7 +427,7 @@ function updateOutput() {
     xUrl.searchParams.set("f", "live");
     if (!invalid) {
         elements.openXLink.href = xUrl.toString();
-        const bookmarklet = `javascript:(()=>{window.open(${JSON.stringify(xUrl.toString())},"_blank","noopener")})()`;
+        const bookmarklet = buildBookmarklet(xUrl.toString());
         elements.bookmarkletLink.href = bookmarklet;
         elements.bookmarkletOutput.value = bookmarklet;
     } else {
@@ -390,6 +438,8 @@ function updateOutput() {
 }
 
 async function copyQuery() {
+    updateOutput();
+    if (elements.copyButton.disabled) return;
     saveSettingsToCookie();
     const query = elements.queryOutput.value;
 
@@ -486,7 +536,12 @@ function saveSearchHistory() {
     }
 }
 
-function handleOpenXClick() {
+function handleOpenXClick(event) {
+    updateOutput();
+    if (elements.copyButton.disabled) {
+        event.preventDefault();
+        return;
+    }
     saveSettingsToCookie();
     saveSearchHistory();
 }
@@ -499,6 +554,8 @@ function updateIncludeUsersState() {
 }
 
 async function copyBookmarklet() {
+    updateOutput();
+    if (elements.copyBookmarkletButton.disabled) return;
     saveSettingsToCookie();
     const code = elements.bookmarkletOutput.value;
     try {
@@ -528,6 +585,11 @@ async function copyBookmarklet() {
 ].forEach((checkbox) => checkbox.addEventListener("change", updateOutput));
 
 elements.enableDateRange.addEventListener("change", updateDateRangeState);
+elements.dateMode.addEventListener("change", () => {
+    updateDateRangeState();
+    updateOutput();
+});
+elements.relativeDays.addEventListener("input", updateOutput);
 elements.previousMonth.addEventListener("click", () => {
     calendarMonth.setUTCMonth(calendarMonth.getUTCMonth() - 1);
     renderCalendar();
@@ -545,7 +607,7 @@ elements.clearDateRange.addEventListener("click", () => {
 });
 elements.calendarGrid.addEventListener("pointerdown", handleCalendarPointerDown);
 elements.calendarGrid.addEventListener("click", (event) => {
-    if (event.detail !== 0 || !elements.enableDateRange.checked) return;
+    if (event.detail !== 0 || !elements.enableDateRange.checked || elements.dateMode.value !== "fixed") return;
     const day = event.target.closest?.("[data-date]");
     if (day && elements.calendarGrid.contains(day)) selectCalendarDate(day.dataset.date);
 });
@@ -561,6 +623,9 @@ elements.copyButton.addEventListener("click", copyQuery);
 elements.copyBookmarkletButton.addEventListener("click", copyBookmarklet);
 elements.openXLink.addEventListener("click", handleOpenXClick);
 elements.bookmarkletLink.addEventListener("click", saveSettingsToCookie);
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) updateOutput();
+});
 
 restoreSettingsFromCookie();
 updateDateRangeState();

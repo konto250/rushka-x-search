@@ -66,18 +66,30 @@
                 </div>
                 <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> / <code>until:</code>）</label>
                 <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true">
-                    <input id="sinceDate" type="hidden" />
-                    <input id="untilDate" type="hidden" />
-                    <div class="calendar-header">
-                        <button id="previousMonth" type="button" class="calendar-nav" aria-label="前の月" disabled>‹</button>
-                        <strong id="calendarMonthLabel"></strong>
-                        <button id="nextMonth" type="button" class="calendar-nav" aria-label="次の月" disabled>›</button>
+                    <label for="dateMode">指定方法</label>
+                    <select id="dateMode" disabled>
+                        <option value="fixed">カレンダーで期間を指定</option>
+                        <option value="relative">過去の日数で指定</option>
+                    </select>
+                    <div id="relativeDateWrap" hidden>
+                        <label for="relativeDays">過去何日（今日を含む）</label>
+                        <input id="relativeDays" type="number" min="1" step="1" value="7" disabled />
+                        <p id="relativeDateSummary" class="selected-date-range" aria-live="polite"></p>
                     </div>
-                    <div class="calendar-weekdays" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
-                    <div id="calendarGrid" class="calendar-grid" aria-label="検索期間のカレンダー"></div>
-                    <p id="selectedDateRange" class="selected-date-range" aria-live="polite">期間を選択してください。</p>
-                    <button id="clearDateRange" type="button" class="calendar-clear" disabled>期間をクリア</button>
-                    <small>開始日から終了日までドラッグしてください。長い期間は開始日をクリックし、月を移動して終了日をクリックできます。終了日も検索対象に含まれます。</small>
+                    <div id="fixedDateWrap">
+                        <input id="sinceDate" type="hidden" />
+                        <input id="untilDate" type="hidden" />
+                        <div class="calendar-header">
+                            <button id="previousMonth" type="button" class="calendar-nav" aria-label="前の月" disabled>‹</button>
+                            <strong id="calendarMonthLabel"></strong>
+                            <button id="nextMonth" type="button" class="calendar-nav" aria-label="次の月" disabled>›</button>
+                        </div>
+                        <div class="calendar-weekdays" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
+                        <div id="calendarGrid" class="calendar-grid" aria-label="検索期間のカレンダー"></div>
+                        <p id="selectedDateRange" class="selected-date-range" aria-live="polite">期間を選択してください。</p>
+                        <button id="clearDateRange" type="button" class="calendar-clear" disabled>期間をクリア</button>
+                        <small>開始日から終了日までドラッグしてください。長い期間は開始日をクリックし、月を移動して終了日をクリックできます。終了日も検索対象に含まれます。</small>
+                    </div>
                 </div>
             </div>
         </section>
@@ -102,7 +114,7 @@
 
         <section class="card">
             <h2>ブックマークレット</h2>
-            <p>下のリンクをブックマークバーにドラッグすると、現在の条件でX検索を開けます。</p>
+            <p>下のリンクをブックマークバーにドラッグすると、現在の条件でX検索を開けます。過去の日数を指定した場合は、実行した日の期間を計算します。</p>
             <a id="bookmarkletLink" class="bookmarklet-link" draggable="true">Xで検索</a>
             <label for="bookmarkletOutput">ブックマークレット用JavaScript</label>
             <textarea id="bookmarkletOutput" readonly></textarea>
