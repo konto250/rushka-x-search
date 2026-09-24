@@ -1,5 +1,7 @@
 const SETTINGS_COOKIE_KEY = "rushka_x_search_settings";
 const SETTINGS_COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
+const HISTORY_STORAGE_KEY = "x_search_history";
+const HISTORY_LIMIT = 5;
 
 const elements = {
     searchTerms: document.getElementById("searchTerms"),
@@ -7,13 +9,20 @@ const elements = {
     dateRangeWrap: document.getElementById("dateRangeWrap"),
     sinceDate: document.getElementById("sinceDate"),
     untilDate: document.getElementById("untilDate"),
-    openSinceCalendar: document.getElementById("openSinceCalendar"),
-    openUntilCalendar: document.getElementById("openUntilCalendar"),
+    previousMonth: document.getElementById("previousMonth"),
+    nextMonth: document.getElementById("nextMonth"),
+    calendarMonthLabel: document.getElementById("calendarMonthLabel"),
+    calendarGrid: document.getElementById("calendarGrid"),
+    selectedDateRange: document.getElementById("selectedDateRange"),
+    clearDateRange: document.getElementById("clearDateRange"),
     mediaOnly: document.getElementById("mediaOnly"),
     followsOnly: document.getElementById("followsOnly"),
     excludeQuote: document.getElementById("excludeQuote"),
     excludeRetweet: document.getElementById("excludeRetweet"),
     excludeReplies: document.getElementById("excludeReplies"),
+    enableIncludeUsers: document.getElementById("enableIncludeUsers"),
+    includeUsersWrap: document.getElementById("includeUsersWrap"),
+    includeUsers: document.getElementById("includeUsers"),
     enableExcludeUsers: document.getElementById("enableExcludeUsers"),
     excludeUsersWrap: document.getElementById("excludeUsersWrap"),
     excludeUsers: document.getElementById("excludeUsers"),
@@ -22,11 +31,19 @@ const elements = {
     copyButton: document.getElementById("copyButton"),
     copyStatus: document.getElementById("copyStatus"),
     openXLink: document.getElementById("openXLink"),
+    historyList: document.getElementById("historyList"),
+    historyStatus: document.getElementById("historyStatus"),
     bookmarkletLink: document.getElementById("bookmarkletLink"),
     bookmarkletOutput: document.getElementById("bookmarkletOutput"),
     copyBookmarkletButton: document.getElementById("copyBookmarkletButton"),
     bookmarkletStatus: document.getElementById("bookmarkletStatus")
 };
+
+let calendarMonth = new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), 1));
+let pendingRangeStart = null;
+let dragStart = null;
+let dragEnd = null;
+let dragPointerId = null;
 
 function setCookie(name, value, maxAgeSeconds) {
     document.cookie = `${name}=${encodeURIComponent(value)}; max-age=${maxAgeSeconds}; path=/; samesite=lax`;
@@ -56,6 +73,8 @@ function collectSettings() {
         excludeQuote: elements.excludeQuote.checked,
         excludeRetweet: elements.excludeRetweet.checked,
         excludeReplies: elements.excludeReplies.checked,
+        enableIncludeUsers: elements.enableIncludeUsers.checked,
+        includeUsers: elements.includeUsers.value,
         enableExcludeUsers: elements.enableExcludeUsers.checked,
         excludeUsers: elements.excludeUsers.value
     };
@@ -66,23 +85,32 @@ function saveSettingsToCookie() {
     setCookie(SETTINGS_COOKIE_KEY, JSON.stringify(settings), SETTINGS_COOKIE_MAX_AGE);
 }
 
+function applySettings(settings) {
+    if (!settings || typeof settings !== "object") return;
+    elements.searchTerms.value = typeof settings.searchTerms === "string" ? settings.searchTerms : "";
+    elements.enableDateRange.checked = Boolean(settings.enableDateRange && ("sinceDate" in settings || "untilDate" in settings));
+    elements.sinceDate.value = typeof settings.sinceDate === "string" ? settings.sinceDate : "";
+    elements.untilDate.value = typeof settings.untilDate === "string" ? settings.untilDate : "";
+    const shownDate = elements.sinceDate.value || (elements.untilDate.value ? addDays(elements.untilDate.value, -1) : "");
+    if (shownDate) calendarMonth = monthFromDate(shownDate);
+    pendingRangeStart = null;
+    elements.mediaOnly.checked = Boolean(settings.mediaOnly);
+    elements.followsOnly.checked = Boolean(settings.followsOnly);
+    elements.excludeQuote.checked = Boolean(settings.excludeQuote);
+    elements.excludeRetweet.checked = Boolean(settings.excludeRetweet);
+    elements.excludeReplies.checked = Boolean(settings.excludeReplies);
+    elements.enableIncludeUsers.checked = Boolean(settings.enableIncludeUsers);
+    elements.includeUsers.value = typeof settings.includeUsers === "string" ? settings.includeUsers : "";
+    elements.enableExcludeUsers.checked = Boolean(settings.enableExcludeUsers);
+    elements.excludeUsers.value = typeof settings.excludeUsers === "string" ? settings.excludeUsers : "";
+}
+
 function restoreSettingsFromCookie() {
     const raw = getCookie(SETTINGS_COOKIE_KEY);
     if (!raw) return;
 
     try {
-        const settings = JSON.parse(raw);
-        elements.searchTerms.value = typeof settings.searchTerms === "string" ? settings.searchTerms : "";
-        elements.enableDateRange.checked = Boolean(settings.enableDateRange && ("sinceDate" in settings || "untilDate" in settings));
-        elements.sinceDate.value = typeof settings.sinceDate === "string" ? settings.sinceDate : "";
-        elements.untilDate.value = typeof settings.untilDate === "string" ? settings.untilDate : "";
-        elements.mediaOnly.checked = Boolean(settings.mediaOnly);
-        elements.followsOnly.checked = Boolean(settings.followsOnly);
-        elements.excludeQuote.checked = Boolean(settings.excludeQuote);
-        elements.excludeRetweet.checked = Boolean(settings.excludeRetweet);
-        elements.excludeReplies.checked = Boolean(settings.excludeReplies);
-        elements.enableExcludeUsers.checked = Boolean(settings.enableExcludeUsers);
-        elements.excludeUsers.value = typeof settings.excludeUsers === "string" ? settings.excludeUsers : "";
+        applySettings(JSON.parse(raw));
     } catch {
         // Cookie may be manually edited or from an old format; ignore and continue.
     }
@@ -92,10 +120,158 @@ function sanitizeUsername(raw) {
     return raw.replace(/^@+/, "").trim();
 }
 
+function parseUsernames(value) {
+    return value.split(/\s+/).map(sanitizeUsername).filter(Boolean);
+}
+
+function parseDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+    const date = new Date(`${value}T00:00:00Z`);
+    return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value ? null : date;
+}
+
+function addDays(value, count) {
+    const date = parseDate(value);
+    if (!date) return "";
+    date.setUTCDate(date.getUTCDate() + count);
+    return date.toISOString().slice(0, 10);
+}
+
+function monthFromDate(value) {
+    const date = parseDate(value);
+    return date ? new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)) : calendarMonth;
+}
+
+function renderCalendar() {
+    const year = calendarMonth.getUTCFullYear();
+    const month = calendarMonth.getUTCMonth();
+    elements.calendarMonthLabel.textContent = `${year}年${month + 1}月`;
+    elements.calendarGrid.replaceChildren();
+    const firstWeekday = (calendarMonth.getUTCDay() + 6) % 7;
+    const firstDay = new Date(Date.UTC(year, month, 1 - firstWeekday));
+    for (let index = 0; index < 42; index++) {
+        const date = new Date(firstDay);
+        date.setUTCDate(firstDay.getUTCDate() + index);
+        const value = date.toISOString().slice(0, 10);
+        const day = document.createElement("button");
+        day.type = "button";
+        day.className = "calendar-day";
+        day.dataset.date = value;
+        day.textContent = String(date.getUTCDate());
+        day.setAttribute("aria-label", `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日`);
+        day.classList.toggle("outside-month", date.getUTCMonth() !== month);
+        day.disabled = !elements.enableDateRange.checked;
+        elements.calendarGrid.append(day);
+    }
+
+    updateCalendarSelection();
+}
+
+function updateCalendarSelection() {
+    const start = dragStart || pendingRangeStart || elements.sinceDate.value;
+    const end = dragStart ? dragEnd : pendingRangeStart || addDays(elements.untilDate.value, -1);
+    const low = start && end ? (start < end ? start : end) : start;
+    const high = start && end ? (start > end ? start : end) : end;
+    for (const day of elements.calendarGrid.children) {
+        const value = day.dataset.date;
+        const selected = Boolean(low && high && value >= low && value <= high);
+        day.setAttribute("aria-pressed", selected ? "true" : "false");
+        day.classList.toggle("in-range", selected);
+        day.classList.toggle("range-edge", value === low || value === high);
+    }
+    const selectedStart = elements.sinceDate.value;
+    const selectedEnd = addDays(elements.untilDate.value, -1);
+    elements.selectedDateRange.textContent = pendingRangeStart
+        ? `${pendingRangeStart} を開始日に選択中。終了日を選んでください。`
+        : selectedStart && selectedEnd
+            ? `選択期間: ${selectedStart} ～ ${selectedEnd}`
+            : selectedStart || selectedEnd
+                ? `選択期間: ${selectedStart || "開始日なし"} ～ ${selectedEnd || "終了日なし"}`
+                : "期間を選択してください。";
+}
+
+function commitDateRange(start, end) {
+    elements.sinceDate.value = start < end ? start : end;
+    elements.untilDate.value = addDays(start > end ? start : end, 1);
+    pendingRangeStart = null;
+    dragStart = null;
+    dragEnd = null;
+    updateOutput();
+    updateCalendarSelection();
+}
+
+function selectCalendarDate(value) {
+    if (pendingRangeStart) {
+        commitDateRange(pendingRangeStart, value);
+    } else {
+        commitDateRange(value, value);
+        pendingRangeStart = value;
+        updateCalendarSelection();
+    }
+}
+
+function dateAtPointer(event) {
+    const target = document.elementFromPoint(event.clientX, event.clientY);
+    const day = target?.closest?.("[data-date]");
+    return day && elements.calendarGrid.contains(day) ? day.dataset.date : null;
+}
+
+function handleCalendarPointerMove(event) {
+    if (dragPointerId !== event.pointerId) return;
+    const value = dateAtPointer(event);
+    if (value && value !== dragEnd) {
+        dragEnd = value;
+        updateCalendarSelection();
+    }
+}
+
+function stopCalendarDrag() {
+    dragPointerId = null;
+    window.removeEventListener("pointermove", handleCalendarPointerMove);
+    window.removeEventListener("pointerup", handleCalendarPointerUp);
+    window.removeEventListener("pointercancel", handleCalendarPointerCancel);
+}
+
+function handleCalendarPointerUp(event) {
+    if (dragPointerId !== event.pointerId) return;
+    handleCalendarPointerMove(event);
+    stopCalendarDrag();
+    if (dragEnd !== dragStart) {
+        commitDateRange(dragStart, dragEnd);
+    } else {
+        selectCalendarDate(dragStart);
+    }
+}
+
+function handleCalendarPointerCancel(event) {
+    if (dragPointerId !== event.pointerId) return;
+    stopCalendarDrag();
+    dragStart = null;
+    dragEnd = null;
+    updateCalendarSelection();
+}
+
+function handleCalendarPointerDown(event) {
+    if (!elements.enableDateRange.checked || dragPointerId !== null) return;
+    const day = event.target.closest?.("[data-date]");
+    if (!day || !elements.calendarGrid.contains(day)) return;
+    event.preventDefault();
+    dragPointerId = event.pointerId;
+    dragStart = day.dataset.date;
+    dragEnd = dragStart;
+    updateCalendarSelection();
+    window.addEventListener("pointermove", handleCalendarPointerMove);
+    window.addEventListener("pointerup", handleCalendarPointerUp);
+    window.addEventListener("pointercancel", handleCalendarPointerCancel);
+}
+
 function buildQuery() {
     const parts = [];
     const searchTerms = elements.searchTerms.value.trim();
-    if (searchTerms) parts.push(searchTerms);
+    if (searchTerms) {
+        const needsGrouping = elements.enableIncludeUsers.checked && /\bOR\b/.test(searchTerms);
+        parts.push(needsGrouping ? `(${searchTerms})` : searchTerms);
+    }
 
     if (elements.mediaOnly.checked) parts.push("filter:media");
     if (elements.followsOnly.checked) parts.push("filter:follows");
@@ -103,11 +279,15 @@ function buildQuery() {
     if (elements.excludeRetweet.checked) parts.push("-filter:retweet");
     if (elements.excludeReplies.checked) parts.push("-filter:replies");
 
+    if (elements.enableIncludeUsers.checked) {
+        const usernames = parseUsernames(elements.includeUsers.value);
+        const filters = usernames.map((user) => `from:@${user}`);
+        if (filters.length === 1) parts.push(filters[0]);
+        if (filters.length > 1) parts.push(`(${filters.join(" OR ")})`);
+    }
+
     if (elements.enableExcludeUsers.checked) {
-        const usernames = elements.excludeUsers.value
-            .split(/\s+/)
-            .map(sanitizeUsername)
-            .filter(Boolean);
+        const usernames = parseUsernames(elements.excludeUsers.value);
 
         usernames.forEach((user) => {
             parts.push(`-from:@${user}`);
@@ -131,12 +311,18 @@ function updateExcludeUsersState() {
 
 function updateDateRangeState() {
     const enabled = elements.enableDateRange.checked;
-    elements.sinceDate.disabled = !enabled;
-    elements.untilDate.disabled = !enabled;
-    elements.openSinceCalendar.disabled = !enabled;
-    elements.openUntilCalendar.disabled = !enabled;
+    if (!enabled && dragPointerId !== null) {
+        stopCalendarDrag();
+        dragStart = null;
+        dragEnd = null;
+    }
+    if (!enabled) pendingRangeStart = null;
+    elements.previousMonth.disabled = !enabled;
+    elements.nextMonth.disabled = !enabled;
+    elements.clearDateRange.disabled = !enabled;
     elements.dateRangeWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
     elements.dateRangeWrap.classList.toggle("disabled", !enabled);
+    renderCalendar();
 }
 
 function updateOutput() {
@@ -145,18 +331,23 @@ function updateOutput() {
     const since = elements.sinceDate.value;
     const until = elements.untilDate.value;
     const invalidRange = elements.enableDateRange.checked && since && until && since >= until;
-    elements.validationStatus.textContent = invalidRange ? "終了日は開始日より後の日付を指定してください。" : "";
-    elements.copyButton.disabled = !query || invalidRange;
-    elements.copyBookmarkletButton.disabled = !query || invalidRange;
-    elements.openXLink.classList.toggle("disabled", !query || invalidRange);
-    elements.openXLink.setAttribute("aria-disabled", !query || invalidRange ? "true" : "false");
-    elements.bookmarkletLink.classList.toggle("disabled", !query || invalidRange);
-    elements.bookmarkletLink.setAttribute("aria-disabled", !query || invalidRange ? "true" : "false");
+    const missingIncludeUsers = elements.enableIncludeUsers.checked && parseUsernames(elements.includeUsers.value).length === 0;
+    const invalid = !query || invalidRange || missingIncludeUsers;
+    elements.validationStatus.textContent = [
+        missingIncludeUsers ? "対象ユーザーを入力してください。" : "",
+        invalidRange ? "終了日は開始日より後の日付を指定してください。" : ""
+    ].filter(Boolean).join(" ");
+    elements.copyButton.disabled = invalid;
+    elements.copyBookmarkletButton.disabled = invalid;
+    elements.openXLink.classList.toggle("disabled", invalid);
+    elements.openXLink.setAttribute("aria-disabled", invalid ? "true" : "false");
+    elements.bookmarkletLink.classList.toggle("disabled", invalid);
+    elements.bookmarkletLink.setAttribute("aria-disabled", invalid ? "true" : "false");
 
     const xUrl = new URL("https://x.com/search");
     xUrl.searchParams.set("q", query);
     xUrl.searchParams.set("f", "live");
-    if (query && !invalidRange) {
+    if (!invalid) {
         elements.openXLink.href = xUrl.toString();
         const bookmarklet = `javascript:(()=>{window.open(${JSON.stringify(xUrl.toString())},"_blank","noopener")})()`;
         elements.bookmarkletLink.href = bookmarklet;
@@ -187,16 +378,93 @@ async function copyQuery() {
     }, 1800);
 }
 
-function openCalendar(input) {
-    if (typeof input.showPicker === "function") {
-        try {
-            input.showPicker();
-            return;
-        } catch {
-            // Unsupported contexts can still use the date field directly.
-        }
+function readHistory() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || "[]");
+        if (!Array.isArray(saved)) return [];
+        return saved.filter((entry) => {
+            if (!entry || typeof entry.query !== "string" || typeof entry.url !== "string" || !entry.settings || typeof entry.settings !== "object") return false;
+            try {
+                const url = new URL(entry.url);
+                return url.origin === "https://x.com" && url.pathname === "/search" && url.searchParams.get("q") === entry.query && url.searchParams.get("f") === "live";
+            } catch {
+                return false;
+            }
+        }).slice(0, HISTORY_LIMIT);
+    } catch {
+        return [];
     }
-    input.focus();
+}
+
+function renderHistory() {
+    elements.historyList.replaceChildren();
+    const history = readHistory();
+    if (history.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "history-empty";
+        empty.textContent = "保存された検索条件はありません。";
+        elements.historyList.append(empty);
+        return;
+    }
+
+    history.forEach((entry) => {
+        const item = document.createElement("li");
+        item.className = "history-item";
+        const query = document.createElement("code");
+        query.className = "history-query";
+        query.textContent = entry.query;
+        const actions = document.createElement("div");
+        actions.className = "history-actions";
+        const link = document.createElement("a");
+        link.href = entry.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "Xで開く";
+        const restoreButton = document.createElement("button");
+        restoreButton.type = "button";
+        restoreButton.textContent = "条件を再展開";
+        restoreButton.addEventListener("click", () => {
+            applySettings(entry.settings);
+            updateDateRangeState();
+            updateIncludeUsersState();
+            updateExcludeUsersState();
+            updateOutput();
+            saveSettingsToCookie();
+            elements.searchTerms.focus();
+        });
+        actions.append(link, restoreButton);
+        item.append(query, actions);
+        elements.historyList.append(item);
+    });
+}
+
+function saveSearchHistory() {
+    if (elements.copyButton.disabled) return;
+    const entry = {
+        settings: collectSettings(),
+        query: elements.queryOutput.value,
+        url: elements.openXLink.href
+    };
+    const history = [entry, ...readHistory().filter((saved) => saved.query !== entry.query)].slice(0, HISTORY_LIMIT);
+    try {
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+        elements.historyStatus.textContent = "検索条件を履歴に保存しました。";
+        renderHistory();
+    } catch {
+        elements.historyStatus.textContent = "履歴を保存できませんでした。";
+    }
+}
+
+function handleOpenXClick() {
+    saveSettingsToCookie();
+    saveSearchHistory();
+}
+
+function updateIncludeUsersState() {
+    const enabled = elements.enableIncludeUsers.checked;
+    elements.includeUsers.disabled = !enabled;
+    elements.includeUsersWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
+    elements.includeUsersWrap.classList.toggle("disabled", !enabled);
 }
 
 async function copyBookmarklet() {
@@ -218,29 +486,51 @@ async function copyBookmarklet() {
 
 [
     elements.enableDateRange,
-    elements.sinceDate,
-    elements.untilDate,
     elements.mediaOnly,
     elements.followsOnly,
     elements.excludeQuote,
     elements.excludeRetweet,
     elements.excludeReplies,
+    elements.enableIncludeUsers,
     elements.enableExcludeUsers
 ].forEach((checkbox) => checkbox.addEventListener("change", updateOutput));
 
 elements.enableDateRange.addEventListener("change", updateDateRangeState);
-elements.openSinceCalendar.addEventListener("click", () => openCalendar(elements.sinceDate));
-elements.openUntilCalendar.addEventListener("click", () => openCalendar(elements.untilDate));
+elements.previousMonth.addEventListener("click", () => {
+    calendarMonth.setUTCMonth(calendarMonth.getUTCMonth() - 1);
+    renderCalendar();
+});
+elements.nextMonth.addEventListener("click", () => {
+    calendarMonth.setUTCMonth(calendarMonth.getUTCMonth() + 1);
+    renderCalendar();
+});
+elements.clearDateRange.addEventListener("click", () => {
+    elements.sinceDate.value = "";
+    elements.untilDate.value = "";
+    pendingRangeStart = null;
+    updateOutput();
+    renderCalendar();
+});
+elements.calendarGrid.addEventListener("pointerdown", handleCalendarPointerDown);
+elements.calendarGrid.addEventListener("click", (event) => {
+    if (event.detail !== 0 || !elements.enableDateRange.checked) return;
+    const day = event.target.closest?.("[data-date]");
+    if (day && elements.calendarGrid.contains(day)) selectCalendarDate(day.dataset.date);
+});
 elements.enableExcludeUsers.addEventListener("change", updateExcludeUsersState);
+elements.enableIncludeUsers.addEventListener("change", updateIncludeUsersState);
 
 elements.searchTerms.addEventListener("input", updateOutput);
 elements.excludeUsers.addEventListener("input", updateOutput);
+elements.includeUsers.addEventListener("input", updateOutput);
 elements.copyButton.addEventListener("click", copyQuery);
 elements.copyBookmarkletButton.addEventListener("click", copyBookmarklet);
-elements.openXLink.addEventListener("click", saveSettingsToCookie);
+elements.openXLink.addEventListener("click", handleOpenXClick);
 elements.bookmarkletLink.addEventListener("click", saveSettingsToCookie);
 
 restoreSettingsFromCookie();
 updateDateRangeState();
 updateExcludeUsersState();
+updateIncludeUsersState();
 updateOutput();
+renderHistory();

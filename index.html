@@ -46,6 +46,12 @@
                 <label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（<code>-filter:quote</code>）</label>
                 <label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（<code>-filter:retweet</code>）</label>
                 <label><input type="checkbox" id="excludeReplies" /> リプライを除外（<code>-filter:replies</code>）</label>
+                <label><input type="checkbox" id="enableIncludeUsers" /> 指定ユーザーのみ検索（<code>from:@user</code>）</label>
+                <div id="includeUsersWrap" class="option-input-wrap disabled" aria-hidden="true">
+                    <label for="includeUsers">対象ユーザー（スペース区切り）</label>
+                    <input id="includeUsers" type="text" placeholder="user1 user2" autocomplete="off" disabled />
+                    <small>複数指定した場合は <code>(from:@user1 OR from:@user2)</code> の形式で追加されます。</small>
+                </div>
                 <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（<code>-from:@user</code>）</label>
                 <div id="excludeUsersWrap" class="option-input-wrap" aria-hidden="true">
                     <label for="excludeUsers">除外ユーザー（スペース区切り）</label>
@@ -54,23 +60,18 @@
                 </div>
                 <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> / <code>until:</code>）</label>
                 <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true">
-                    <div class="date-grid">
-                        <div>
-                            <label for="sinceDate">開始日（since）</label>
-                            <div class="date-control">
-                                <input id="sinceDate" type="date" disabled />
-                                <button id="openSinceCalendar" type="button" class="calendar-button" aria-label="開始日のカレンダーを開く" disabled>カレンダー</button>
-                            </div>
-                        </div>
-                        <div>
-                            <label for="untilDate">終了日（until）</label>
-                            <div class="date-control">
-                                <input id="untilDate" type="date" disabled />
-                                <button id="openUntilCalendar" type="button" class="calendar-button" aria-label="終了日のカレンダーを開く" disabled>カレンダー</button>
-                            </div>
-                        </div>
+                    <input id="sinceDate" type="hidden" />
+                    <input id="untilDate" type="hidden" />
+                    <div class="calendar-header">
+                        <button id="previousMonth" type="button" class="calendar-nav" aria-label="前の月" disabled>‹</button>
+                        <strong id="calendarMonthLabel"></strong>
+                        <button id="nextMonth" type="button" class="calendar-nav" aria-label="次の月" disabled>›</button>
                     </div>
-                    <small>どちらか一方だけでも指定できます。until の日付は検索対象に含まれません。</small>
+                    <div class="calendar-weekdays" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
+                    <div id="calendarGrid" class="calendar-grid" aria-label="検索期間のカレンダー"></div>
+                    <p id="selectedDateRange" class="selected-date-range" aria-live="polite">期間を選択してください。</p>
+                    <button id="clearDateRange" type="button" class="calendar-clear" disabled>期間をクリア</button>
+                    <small>開始日から終了日までドラッグしてください。長い期間は開始日をクリックし、月を移動して終了日をクリックできます。終了日も検索対象に含まれます。</small>
                 </div>
             </div>
         </section>
@@ -84,6 +85,13 @@
                 <a id="openXLink" href="#" target="_blank" rel="noopener noreferrer">Xで開く（最新）</a>
             </div>
             <p id="copyStatus" class="status" aria-live="polite"></p>
+        </section>
+
+        <section class="card">
+            <h2>検索式の履歴</h2>
+            <p class="history-help">「Xで開く」を押した検索条件を最新5件まで保存します。</p>
+            <ul id="historyList" class="history-list"></ul>
+            <p id="historyStatus" class="status" aria-live="polite"></p>
         </section>
 
         <section class="card">

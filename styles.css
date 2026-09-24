@@ -131,27 +131,82 @@ input:disabled {
     cursor: not-allowed;
 }
 
-.date-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-}
-
-.date-control {
+.calendar-header {
     display: flex;
-    gap: 8px;
-    align-items: end;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 420px;
+    margin-bottom: 8px;
 }
 
-.date-control input {
+.calendar-nav {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 1.4rem;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    max-width: 420px;
+    gap: 3px;
+    text-align: center;
+}
+
+.calendar-weekdays {
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.calendar-grid {
+    touch-action: none;
+    user-select: none;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
     min-width: 0;
-    flex: 1;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.9rem;
 }
 
-.calendar-button {
-    flex: 0 0 auto;
-    padding: 10px;
-    white-space: nowrap;
+.calendar-day:hover {
+    background: #dbeafe;
+}
+
+.calendar-day.outside-month {
+    color: var(--muted);
+}
+
+.calendar-day.in-range {
+    background: #bfdbfe;
+}
+
+.calendar-day.range-edge {
+    background: var(--accent);
+    color: #ffffff;
+}
+
+.calendar-day:focus-visible {
+    outline: 2px solid var(--accent-hover);
+    outline-offset: 2px;
+}
+
+.selected-date-range {
+    margin: 10px 0;
+    font-weight: 600;
+}
+
+.calendar-clear {
+    padding: 7px 10px;
+    font-size: 0.9rem;
 }
 
 select {
@@ -243,6 +298,58 @@ button:disabled,
     color: #b42318;
 }
 
+.history-help {
+    margin: 0 0 12px;
+    color: var(--muted);
+}
+
+.history-list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.history-item {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.history-query {
+    display: block;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.history-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.history-actions a,
+.history-actions button {
+    display: inline-block;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.history-actions a {
+    background: #111827;
+    color: #ffffff;
+}
+
+.history-empty {
+    color: var(--muted);
+}
+
 .bookmarklet-link {
     display: inline-block;
     margin: 0 0 14px;
@@ -279,7 +386,4 @@ button:disabled,
         font-size: 1.5rem;
     }
 
-    .date-grid {
-        grid-template-columns: 1fr;
-    }
 }
