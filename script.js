@@ -110,7 +110,7 @@ function buildQuery() {
             .filter(Boolean);
 
         usernames.forEach((user) => {
-            parts.push(`-from:${user}`);
+            parts.push(`-from:@${user}`);
         });
     }
 
