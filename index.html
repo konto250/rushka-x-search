@@ -58,6 +58,12 @@
                     <input id="excludeUsers" type="text" placeholder="user1 user2" autocomplete="off" disabled />
                     <small>例: <code>-from:@user1 -from:@user2</code> の形式で追加されます</small>
                 </div>
+                <label><input type="checkbox" id="enableExcludeKeywords" /> キーワードを除外（<code>-keyword</code>）</label>
+                <div id="excludeKeywordsWrap" class="option-input-wrap disabled" aria-hidden="true">
+                    <label for="excludeKeywords">除外するキーワード（1行に1語句）</label>
+                    <textarea id="excludeKeywords" class="keyword-input" placeholder="猫&#10;黒い 猫" disabled></textarea>
+                    <small>空白を含む語句は <code>-&quot;黒い 猫&quot;</code> の形式で追加されます。</small>
+                </div>
                 <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> / <code>until:</code>）</label>
                 <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true">
                     <input id="sinceDate" type="hidden" />

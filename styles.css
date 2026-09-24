@@ -243,6 +243,18 @@ textarea {
     font-size: 0.96rem;
 }
 
+.keyword-input {
+    min-height: 76px;
+    margin-top: 8px;
+    font-family: inherit;
+}
+
+.keyword-input:disabled {
+    background: #eef2f7;
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
 .button-row {
     display: flex;
     flex-wrap: wrap;

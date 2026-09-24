@@ -26,6 +26,9 @@ const elements = {
     enableExcludeUsers: document.getElementById("enableExcludeUsers"),
     excludeUsersWrap: document.getElementById("excludeUsersWrap"),
     excludeUsers: document.getElementById("excludeUsers"),
+    enableExcludeKeywords: document.getElementById("enableExcludeKeywords"),
+    excludeKeywordsWrap: document.getElementById("excludeKeywordsWrap"),
+    excludeKeywords: document.getElementById("excludeKeywords"),
     queryOutput: document.getElementById("queryOutput"),
     validationStatus: document.getElementById("validationStatus"),
     copyButton: document.getElementById("copyButton"),
@@ -76,7 +79,9 @@ function collectSettings() {
         enableIncludeUsers: elements.enableIncludeUsers.checked,
         includeUsers: elements.includeUsers.value,
         enableExcludeUsers: elements.enableExcludeUsers.checked,
-        excludeUsers: elements.excludeUsers.value
+        excludeUsers: elements.excludeUsers.value,
+        enableExcludeKeywords: elements.enableExcludeKeywords.checked,
+        excludeKeywords: elements.excludeKeywords.value
     };
 }
 
@@ -103,6 +108,8 @@ function applySettings(settings) {
     elements.includeUsers.value = typeof settings.includeUsers === "string" ? settings.includeUsers : "";
     elements.enableExcludeUsers.checked = Boolean(settings.enableExcludeUsers);
     elements.excludeUsers.value = typeof settings.excludeUsers === "string" ? settings.excludeUsers : "";
+    elements.enableExcludeKeywords.checked = Boolean(settings.enableExcludeKeywords);
+    elements.excludeKeywords.value = typeof settings.excludeKeywords === "string" ? settings.excludeKeywords : "";
 }
 
 function restoreSettingsFromCookie() {
@@ -122,6 +129,13 @@ function sanitizeUsername(raw) {
 
 function parseUsernames(value) {
     return value.split(/\s+/).map(sanitizeUsername).filter(Boolean);
+}
+
+function excludedKeywordFilter(raw) {
+    const keyword = raw.trim().replace(/^-(?=\S)/, "");
+    if (!keyword) return "";
+    if (/^"[^"]+"$/.test(keyword)) return `-${keyword}`;
+    return /\s/.test(keyword) ? `-"${keyword}"` : `-${keyword}`;
 }
 
 function parseDate(value) {
@@ -269,7 +283,8 @@ function buildQuery() {
     const parts = [];
     const searchTerms = elements.searchTerms.value.trim();
     if (searchTerms) {
-        const needsGrouping = elements.enableIncludeUsers.checked && /\bOR\b/.test(searchTerms);
+        const hasScopedFilters = elements.enableIncludeUsers.checked || (elements.enableExcludeKeywords.checked && elements.excludeKeywords.value.trim());
+        const needsGrouping = hasScopedFilters && /\bOR\b/.test(searchTerms);
         parts.push(needsGrouping ? `(${searchTerms})` : searchTerms);
     }
 
@@ -299,6 +314,14 @@ function buildQuery() {
         if (elements.untilDate.value) parts.push(`until:${elements.untilDate.value}`);
     }
 
+    if (elements.enableExcludeKeywords.checked) {
+        elements.excludeKeywords.value
+            .split(/\r?\n/)
+            .map(excludedKeywordFilter)
+            .filter(Boolean)
+            .forEach((filter) => parts.push(filter));
+    }
+
     return parts.join(" ");
 }
 
@@ -323,6 +346,13 @@ function updateDateRangeState() {
     elements.dateRangeWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
     elements.dateRangeWrap.classList.toggle("disabled", !enabled);
     renderCalendar();
+}
+
+function updateExcludeKeywordsState() {
+    const enabled = elements.enableExcludeKeywords.checked;
+    elements.excludeKeywords.disabled = !enabled;
+    elements.excludeKeywordsWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
+    elements.excludeKeywordsWrap.classList.toggle("disabled", !enabled);
 }
 
 function updateOutput() {
@@ -428,6 +458,7 @@ function renderHistory() {
             updateDateRangeState();
             updateIncludeUsersState();
             updateExcludeUsersState();
+            updateExcludeKeywordsState();
             updateOutput();
             saveSettingsToCookie();
             elements.searchTerms.focus();
@@ -492,7 +523,8 @@ async function copyBookmarklet() {
     elements.excludeRetweet,
     elements.excludeReplies,
     elements.enableIncludeUsers,
-    elements.enableExcludeUsers
+    elements.enableExcludeUsers,
+    elements.enableExcludeKeywords
 ].forEach((checkbox) => checkbox.addEventListener("change", updateOutput));
 
 elements.enableDateRange.addEventListener("change", updateDateRangeState);
@@ -518,11 +550,13 @@ elements.calendarGrid.addEventListener("click", (event) => {
     if (day && elements.calendarGrid.contains(day)) selectCalendarDate(day.dataset.date);
 });
 elements.enableExcludeUsers.addEventListener("change", updateExcludeUsersState);
+elements.enableExcludeKeywords.addEventListener("change", updateExcludeKeywordsState);
 elements.enableIncludeUsers.addEventListener("change", updateIncludeUsersState);
 
 elements.searchTerms.addEventListener("input", updateOutput);
 elements.excludeUsers.addEventListener("input", updateOutput);
 elements.includeUsers.addEventListener("input", updateOutput);
+elements.excludeKeywords.addEventListener("input", updateOutput);
 elements.copyButton.addEventListener("click", copyQuery);
 elements.copyBookmarkletButton.addEventListener("click", copyBookmarklet);
 elements.openXLink.addEventListener("click", handleOpenXClick);
@@ -531,6 +565,7 @@ elements.bookmarkletLink.addEventListener("click", saveSettingsToCookie);
 restoreSettingsFromCookie();
 updateDateRangeState();
 updateExcludeUsersState();
+updateExcludeKeywordsState();
 updateIncludeUsersState();
 updateOutput();
 renderHistory();
