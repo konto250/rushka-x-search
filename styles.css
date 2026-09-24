@@ -137,6 +137,23 @@ input:disabled {
     gap: 12px;
 }
 
+.date-control {
+    display: flex;
+    gap: 8px;
+    align-items: end;
+}
+
+.date-control input {
+    min-width: 0;
+    flex: 1;
+}
+
+.calendar-button {
+    flex: 0 0 auto;
+    padding: 10px;
+    white-space: nowrap;
+}
+
 select {
     width: 100%;
     margin-top: 8px;

@@ -55,8 +55,20 @@
                 <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> / <code>until:</code>）</label>
                 <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true">
                     <div class="date-grid">
-                        <div><label for="sinceDate">開始日（since）</label><input id="sinceDate" type="date" disabled /></div>
-                        <div><label for="untilDate">終了日（until）</label><input id="untilDate" type="date" disabled /></div>
+                        <div>
+                            <label for="sinceDate">開始日（since）</label>
+                            <div class="date-control">
+                                <input id="sinceDate" type="date" disabled />
+                                <button id="openSinceCalendar" type="button" class="calendar-button" aria-label="開始日のカレンダーを開く" disabled>カレンダー</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="untilDate">終了日（until）</label>
+                            <div class="date-control">
+                                <input id="untilDate" type="date" disabled />
+                                <button id="openUntilCalendar" type="button" class="calendar-button" aria-label="終了日のカレンダーを開く" disabled>カレンダー</button>
+                            </div>
+                        </div>
                     </div>
                     <small>どちらか一方だけでも指定できます。until の日付は検索対象に含まれません。</small>
                 </div>

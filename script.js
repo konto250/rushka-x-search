@@ -7,6 +7,8 @@ const elements = {
     dateRangeWrap: document.getElementById("dateRangeWrap"),
     sinceDate: document.getElementById("sinceDate"),
     untilDate: document.getElementById("untilDate"),
+    openSinceCalendar: document.getElementById("openSinceCalendar"),
+    openUntilCalendar: document.getElementById("openUntilCalendar"),
     mediaOnly: document.getElementById("mediaOnly"),
     followsOnly: document.getElementById("followsOnly"),
     excludeQuote: document.getElementById("excludeQuote"),
@@ -131,6 +133,8 @@ function updateDateRangeState() {
     const enabled = elements.enableDateRange.checked;
     elements.sinceDate.disabled = !enabled;
     elements.untilDate.disabled = !enabled;
+    elements.openSinceCalendar.disabled = !enabled;
+    elements.openUntilCalendar.disabled = !enabled;
     elements.dateRangeWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
     elements.dateRangeWrap.classList.toggle("disabled", !enabled);
 }
@@ -183,6 +187,18 @@ async function copyQuery() {
     }, 1800);
 }
 
+function openCalendar(input) {
+    if (typeof input.showPicker === "function") {
+        try {
+            input.showPicker();
+            return;
+        } catch {
+            // Unsupported contexts can still use the date field directly.
+        }
+    }
+    input.focus();
+}
+
 async function copyBookmarklet() {
     saveSettingsToCookie();
     const code = elements.bookmarkletOutput.value;
@@ -213,6 +229,8 @@ async function copyBookmarklet() {
 ].forEach((checkbox) => checkbox.addEventListener("change", updateOutput));
 
 elements.enableDateRange.addEventListener("change", updateDateRangeState);
+elements.openSinceCalendar.addEventListener("click", () => openCalendar(elements.sinceDate));
+elements.openUntilCalendar.addEventListener("click", () => openCalendar(elements.untilDate));
 elements.enableExcludeUsers.addEventListener("change", updateExcludeUsersState);
 
 elements.searchTerms.addEventListener("input", updateOutput);
