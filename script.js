@@ -168,11 +168,9 @@ function getRelativeDateRange(now = new Date()) {
     const days = Number(elements.relativeDays.value);
     if (!Number.isSafeInteger(days) || days < 1 || elements.relativeDays.value.trim() === "") return null;
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const end = new Date(start);
     start.setDate(start.getDate() - days + 1);
-    end.setDate(end.getDate() + 1);
     if (Number.isNaN(start.getTime()) || start.getFullYear() < 1) return null;
-    return { since: formatLocalDate(start), until: formatLocalDate(end) };
+    return { since: formatLocalDate(start) };
 }
 
 function monthFromDate(value) {
@@ -395,7 +393,7 @@ function buildBookmarklet(xUrl) {
 
     const baseQuery = JSON.stringify(buildQuery(false));
     const daysBeforeToday = Number(elements.relativeDays.value) - 1;
-    return `javascript:(()=>{const t=new Date();t.setHours(0,0,0,0);const s=new Date(t);s.setDate(s.getDate()-${daysBeforeToday});const u=new Date(t);u.setDate(u.getDate()+1);const f=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const q=[${baseQuery},"since:"+f(s),"until:"+f(u)].filter(Boolean).join(" ");const x=new URL("https://x.com/search");x.searchParams.set("q",q);x.searchParams.set("f","live");window.open(x.toString(),"_blank","noopener")})()`;
+    return `javascript:(()=>{const t=new Date();t.setHours(0,0,0,0);const s=new Date(t);s.setDate(s.getDate()-${daysBeforeToday});const f=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const q=[${baseQuery},"since:"+f(s)].filter(Boolean).join(" ");const x=new URL("https://x.com/search");x.searchParams.set("q",q);x.searchParams.set("f","live");window.open(x.toString(),"_blank","noopener")})()`;
 }
 
 function updateOutput() {
@@ -403,7 +401,7 @@ function updateOutput() {
     const relative = elements.enableDateRange.checked && elements.dateMode.value === "relative";
     const relativeDates = relative ? getRelativeDateRange(now) : null;
     elements.relativeDateSummary.textContent = relativeDates
-        ? `現在の検索期間: ${relativeDates.since} ～ ${addDays(relativeDates.until, -1)}`
+        ? `現在の検索開始日: ${relativeDates.since}（今日まで）`
         : "";
     const query = buildQuery(true, now);
     elements.queryOutput.value = query;
