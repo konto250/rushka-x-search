@@ -21,18 +21,18 @@ body {
 
 .repo-link-wrap {
     position: fixed;
-    top: 16px;
-    right: 16px;
+    top: 12px;
+    right: 12px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 14px;
+    padding: 7px 10px;
     border: 1px solid var(--border);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.92);
     color: var(--text);
     text-decoration: none;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
     box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
     backdrop-filter: blur(8px);
@@ -56,33 +56,33 @@ body {
 }
 
 .container {
-    max-width: 860px;
-    margin: 40px auto;
-    padding: 0 16px 40px;
+    max-width: 780px;
+    margin: 24px auto;
+    padding: 0 16px 24px;
 }
 
 h1 {
-    margin: 0 0 8px;
-    font-size: 1.9rem;
+    margin: 0 0 4px;
+    font-size: 1.65rem;
 }
 
 .subtitle {
-    margin: 0 0 20px;
+    margin: 0 0 14px;
     color: var(--muted);
 }
 
 .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
 }
 
 h2 {
-    margin: 0 0 12px;
-    font-size: 1.1rem;
+    margin: 0 0 8px;
+    font-size: 1.05rem;
 }
 
 .readonly {
@@ -95,16 +95,31 @@ h2 {
 
 .options-grid {
     display: grid;
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 12px;
+}
+
+.option-group {
+    min-width: 0;
+    padding: 5px 8px;
+    border-radius: 8px;
+}
+
+.option-group:hover {
+    background: #f8fafc;
+}
+
+.date-option {
+    grid-column: 1 / -1;
 }
 
 .search-exclude {
-    margin-top: 10px;
+    margin-top: 7px;
 }
 
 .option-input-wrap {
-    margin-left: 24px;
-    padding: 10px;
+    margin: 6px 0 0 20px;
+    padding: 8px;
     border: 1px dashed var(--border);
     border-radius: 10px;
     background: #f8fafc;
@@ -115,7 +130,7 @@ h2 {
 }
 
 .option-input-wrap.compact-input {
-    margin-top: 4px;
+    margin-top: 3px;
     padding: 0;
     border: 0;
     background: transparent;
@@ -135,8 +150,8 @@ input[type="text"],
 input[type="date"],
 input[type="number"] {
     width: 100%;
-    margin-top: 8px;
-    padding: 10px 12px;
+    margin-top: 5px;
+    padding: 8px 10px;
     border: 1px solid var(--border);
     border-radius: 10px;
     font-size: 1rem;
@@ -144,7 +159,7 @@ input[type="number"] {
 
 #fixedDateWrap,
 #relativeDateWrap {
-    margin-top: 12px;
+    margin-top: 8px;
 }
 
 input:disabled {
@@ -157,8 +172,8 @@ input:disabled {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 420px;
-    margin-bottom: 8px;
+    max-width: 350px;
+    margin-bottom: 5px;
 }
 
 .calendar-nav {
@@ -172,7 +187,7 @@ input:disabled {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    max-width: 420px;
+    max-width: 350px;
     gap: 3px;
     text-align: center;
 }
@@ -222,7 +237,7 @@ input:disabled {
 }
 
 .selected-date-range {
-    margin: 10px 0;
+    margin: 7px 0;
     font-weight: 600;
 }
 
@@ -233,8 +248,8 @@ input:disabled {
 
 select {
     width: 100%;
-    margin-top: 8px;
-    padding: 10px 12px;
+    margin-top: 5px;
+    padding: 8px 10px;
     border: 1px solid var(--border);
     border-radius: 10px;
     font-size: 1rem;
@@ -256,9 +271,9 @@ small {
 
 textarea {
     width: 100%;
-    min-height: 110px;
+    min-height: 70px;
     resize: vertical;
-    padding: 10px 12px;
+    padding: 8px 10px;
     border: 1px solid var(--border);
     border-radius: 10px;
     font-family: Consolas, "Courier New", monospace;
@@ -266,7 +281,7 @@ textarea {
 }
 
 .keyword-input {
-    min-height: 60px;
+    min-height: 52px;
     font-family: inherit;
 }
 
@@ -279,8 +294,8 @@ textarea {
 .button-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 12px;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 button,
@@ -288,7 +303,7 @@ button,
     appearance: none;
     border: 0;
     border-radius: 10px;
-    padding: 10px 14px;
+    padding: 8px 11px;
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
@@ -320,32 +335,39 @@ button:disabled,
 }
 
 .status {
-    min-height: 1.2em;
-    margin: 10px 0 0;
+    margin: 7px 0 0;
     color: #0f766e;
     font-size: 0.92rem;
 }
 
 .error {
-    margin: 8px 0 0;
+    margin: 6px 0 0;
     color: #b42318;
 }
 
+.status:empty,
+.error:empty {
+    display: none;
+}
+
 .history-help {
-    margin: 0 0 12px;
+    margin: 0 0 8px;
     color: var(--muted);
 }
 
 .history-list {
     display: grid;
-    gap: 10px;
+    gap: 7px;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
 .history-item {
-    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: #f8fafc;
@@ -353,6 +375,8 @@ button:disabled,
 
 .history-query {
     display: block;
+    flex: 1;
+    min-width: 0;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
 }
@@ -361,14 +385,14 @@ button:disabled,
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 10px;
+    flex: 0 0 auto;
 }
 
 .history-actions a,
 .history-actions button {
     display: inline-block;
     border-radius: 8px;
-    padding: 7px 10px;
+    padding: 6px 9px;
     font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
@@ -397,8 +421,8 @@ button:disabled,
 
 .bookmarklet-link {
     display: inline-block;
-    margin: 0 0 14px;
-    padding: 10px 14px;
+    margin: 0 0 10px;
+    padding: 8px 11px;
     border-radius: 10px;
     background: #111827;
     color: #ffffff;
@@ -411,8 +435,28 @@ button:disabled,
 }
 
 #bookmarkletOutput {
-    min-height: 90px;
-    margin-top: 8px;
+    min-height: 68px;
+    margin-top: 5px;
+}
+
+.bookmarklet-panel summary {
+    cursor: pointer;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.bookmarklet-panel summary + p {
+    margin: 10px 0;
+}
+
+@media (max-width: 700px) {
+    .history-item {
+        display: block;
+    }
+
+    .history-actions {
+        margin-top: 6px;
+    }
 }
 
 @media (max-width: 600px) {
@@ -424,11 +468,15 @@ button:disabled,
     }
 
     .container {
-        margin-top: 72px;
+        margin-top: 62px;
     }
 
     h1 {
         font-size: 1.5rem;
+    }
+
+    .options-grid {
+        grid-template-columns: 1fr;
     }
 
 }
