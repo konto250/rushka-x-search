@@ -15,6 +15,7 @@
 body {
     margin: 0;
     font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.9375rem;
     background: linear-gradient(180deg, #eef3f8 0%, #f8fafc 100%);
     color: var(--text);
 }
@@ -63,7 +64,7 @@ body {
 
 h1 {
     margin: 0 0 4px;
-    font-size: 1.65rem;
+    font-size: 1.5rem;
 }
 
 .subtitle {
@@ -82,7 +83,7 @@ h1 {
 
 h2 {
     margin: 0 0 8px;
-    font-size: 1.05rem;
+    font-size: 1rem;
 }
 
 .readonly {
@@ -154,7 +155,7 @@ input[type="number"] {
     padding: 8px 10px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    font-size: 1rem;
+    font-size: 0.9375rem;
 }
 
 #fixedDateWrap,
@@ -180,7 +181,7 @@ input:disabled {
     width: 36px;
     height: 36px;
     padding: 0;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
 }
 
 .calendar-weekdays,
@@ -252,7 +253,7 @@ select {
     padding: 8px 10px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     background: #ffffff;
     color: var(--text);
 }
@@ -277,7 +278,7 @@ textarea {
     border: 1px solid var(--border);
     border-radius: 10px;
     font-family: Consolas, "Courier New", monospace;
-    font-size: 0.96rem;
+    font-size: 0.9rem;
 }
 
 .keyword-input {
@@ -441,7 +442,7 @@ button:disabled,
 
 .bookmarklet-panel summary {
     cursor: pointer;
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 700;
 }
 
@@ -464,7 +465,7 @@ button:disabled,
         top: 12px;
         right: 12px;
         padding: 9px 12px;
-        font-size: 0.95rem;
+        font-size: 0.85rem;
     }
 
     .container {
@@ -472,7 +473,7 @@ button:disabled,
     }
 
     h1 {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
     }
 
     .options-grid {
