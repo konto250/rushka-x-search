@@ -35,7 +35,12 @@
             <h2>検索語</h2>
             <label for="searchTerms">検索する文字列</label>
             <input id="searchTerms" type="text" placeholder="例: 猫 OR #猫" autocomplete="off" />
-            <small>語句やXの検索演算子をそのまま入力できます。</small>
+            <div class="search-exclude">
+                <label><input type="checkbox" id="enableExcludeKeywords" /> キーワードを除外（<code>-keyword</code>）</label>
+                <div id="excludeKeywordsWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
+                    <textarea id="excludeKeywords" class="keyword-input" aria-label="除外するキーワード（1行に1語句）" placeholder="除外する語句を1行ずつ入力" disabled></textarea>
+                </div>
+            </div>
         </section>
 
         <section class="card">
@@ -47,25 +52,15 @@
                 <label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（<code>-filter:retweet</code>）</label>
                 <label><input type="checkbox" id="excludeReplies" /> リプライを除外（<code>-filter:replies</code>）</label>
                 <label><input type="checkbox" id="enableIncludeUsers" /> 指定ユーザーのみ検索（<code>from:@user</code>）</label>
-                <div id="includeUsersWrap" class="option-input-wrap disabled" aria-hidden="true">
-                    <label for="includeUsers">対象ユーザー（スペース区切り）</label>
-                    <input id="includeUsers" type="text" placeholder="user1 user2" autocomplete="off" disabled />
-                    <small>複数指定した場合は <code>(from:@user1 OR from:@user2)</code> の形式で追加されます。</small>
+                <div id="includeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
+                    <input id="includeUsers" type="text" aria-label="対象ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力" autocomplete="off" disabled />
                 </div>
                 <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（<code>-from:@user</code>）</label>
-                <div id="excludeUsersWrap" class="option-input-wrap" aria-hidden="true">
-                    <label for="excludeUsers">除外ユーザー（スペース区切り）</label>
-                    <input id="excludeUsers" type="text" placeholder="user1 user2" autocomplete="off" disabled />
-                    <small>例: <code>-from:@user1 -from:@user2</code> の形式で追加されます</small>
-                </div>
-                <label><input type="checkbox" id="enableExcludeKeywords" /> キーワードを除外（<code>-keyword</code>）</label>
-                <div id="excludeKeywordsWrap" class="option-input-wrap disabled" aria-hidden="true">
-                    <label for="excludeKeywords">除外するキーワード（1行に1語句）</label>
-                    <textarea id="excludeKeywords" class="keyword-input" placeholder="猫&#10;黒い 猫" disabled></textarea>
-                    <small>空白を含む語句は <code>-&quot;黒い 猫&quot;</code> の形式で追加されます。</small>
+                <div id="excludeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
+                    <input id="excludeUsers" type="text" aria-label="除外ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力" autocomplete="off" disabled />
                 </div>
                 <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> / <code>until:</code>）</label>
-                <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true">
+                <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true" hidden>
                     <label for="dateMode">指定方法</label>
                     <select id="dateMode" disabled>
                         <option value="fixed">カレンダーで期間を指定</option>

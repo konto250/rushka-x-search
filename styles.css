@@ -75,8 +75,8 @@ h1 {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
     box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
 }
 
@@ -95,7 +95,11 @@ h2 {
 
 .options-grid {
     display: grid;
-    gap: 10px;
+    gap: 8px;
+}
+
+.search-exclude {
+    margin-top: 10px;
 }
 
 .option-input-wrap {
@@ -108,6 +112,18 @@ h2 {
 
 .option-input-wrap.disabled {
     opacity: 0.6;
+}
+
+.option-input-wrap.compact-input {
+    margin-top: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.compact-input input[type="text"],
+.compact-input textarea {
+    margin-top: 0;
 }
 
 label {
@@ -250,8 +266,7 @@ textarea {
 }
 
 .keyword-input {
-    min-height: 76px;
-    margin-top: 8px;
+    min-height: 60px;
     font-family: inherit;
 }
 

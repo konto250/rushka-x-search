@@ -353,6 +353,7 @@ function buildQuery(includeDate = true, now = new Date()) {
 function updateExcludeUsersState() {
     const enabled = elements.enableExcludeUsers.checked;
     elements.excludeUsers.disabled = !enabled;
+    elements.excludeUsersWrap.hidden = !enabled;
     elements.excludeUsersWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
     elements.excludeUsersWrap.classList.toggle("disabled", !enabled);
 }
@@ -373,6 +374,7 @@ function updateDateRangeState() {
     elements.previousMonth.disabled = !enabled || !fixed;
     elements.nextMonth.disabled = !enabled || !fixed;
     elements.clearDateRange.disabled = !enabled || !fixed;
+    elements.dateRangeWrap.hidden = !enabled;
     elements.dateRangeWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
     elements.dateRangeWrap.classList.toggle("disabled", !enabled);
     renderCalendar();
@@ -381,6 +383,7 @@ function updateDateRangeState() {
 function updateExcludeKeywordsState() {
     const enabled = elements.enableExcludeKeywords.checked;
     elements.excludeKeywords.disabled = !enabled;
+    elements.excludeKeywordsWrap.hidden = !enabled;
     elements.excludeKeywordsWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
     elements.excludeKeywordsWrap.classList.toggle("disabled", !enabled);
 }
@@ -549,6 +552,7 @@ function handleOpenXClick(event) {
 function updateIncludeUsersState() {
     const enabled = elements.enableIncludeUsers.checked;
     elements.includeUsers.disabled = !enabled;
+    elements.includeUsersWrap.hidden = !enabled;
     elements.includeUsersWrap.setAttribute("aria-hidden", enabled ? "false" : "true");
     elements.includeUsersWrap.classList.toggle("disabled", !enabled);
 }
