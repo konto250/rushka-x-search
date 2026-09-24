@@ -379,6 +379,18 @@ button:disabled,
     color: #ffffff;
 }
 
+.history-actions .history-delete {
+    margin-left: auto;
+    border: 1px solid #b42318;
+    background: #ffffff;
+    color: #b42318;
+    cursor: pointer;
+}
+
+.history-actions .history-delete:hover {
+    background: #fef3f2;
+}
+
 .history-empty {
     color: var(--muted);
 }

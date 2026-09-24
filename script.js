@@ -516,7 +516,22 @@ function renderHistory() {
             saveSettingsToCookie();
             elements.searchTerms.focus();
         });
-        actions.append(link, restoreButton);
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "history-delete";
+        deleteButton.textContent = "削除";
+        deleteButton.setAttribute("aria-label", `履歴「${entry.query}」を削除`);
+        deleteButton.addEventListener("click", () => {
+            const remaining = readHistory().filter((saved) => saved.query !== entry.query);
+            try {
+                localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(remaining));
+                renderHistory();
+                elements.historyStatus.textContent = "履歴を削除しました。";
+            } catch {
+                elements.historyStatus.textContent = "履歴を削除できませんでした。";
+            }
+        });
+        actions.append(link, restoreButton, deleteButton);
         item.append(query, actions);
         elements.historyList.append(item);
     });
