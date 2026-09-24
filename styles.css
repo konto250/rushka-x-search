@@ -115,13 +115,26 @@ label {
     line-height: 1.4;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="date"] {
     width: 100%;
     margin-top: 8px;
     padding: 10px 12px;
     border: 1px solid var(--border);
     border-radius: 10px;
     font-size: 1rem;
+}
+
+input:disabled {
+    background: #eef2f7;
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
+.date-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
 }
 
 select {
@@ -185,6 +198,13 @@ button:hover {
     background: var(--accent-hover);
 }
 
+button:disabled,
+.button-row a.disabled,
+.bookmarklet-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .button-row a {
     background: #111827;
     color: #ffffff;
@@ -201,6 +221,31 @@ button:hover {
     font-size: 0.92rem;
 }
 
+.error {
+    margin: 8px 0 0;
+    color: #b42318;
+}
+
+.bookmarklet-link {
+    display: inline-block;
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #111827;
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.bookmarklet-link:hover {
+    background: #1f2937;
+}
+
+#bookmarkletOutput {
+    min-height: 90px;
+    margin-top: 8px;
+}
+
 @media (max-width: 600px) {
     .repo-link-wrap {
         top: 12px;
@@ -215,5 +260,9 @@ button:hover {
 
     h1 {
         font-size: 1.5rem;
+    }
+
+    .date-grid {
+        grid-template-columns: 1fr;
     }
 }

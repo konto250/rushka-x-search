@@ -4,18 +4,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ルーシュカ Xエゴサビルダー</title>
-    <meta name="description" content="ルーシュカ関連のX検索式を作成して、コピーまたはXで直接検索できる静的アプリです。" />
+    <title>X検索式ビルダー</title>
+    <meta name="description" content="検索語や日付、各種フィルターを指定してXの検索式を作成できます。" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ja_JP" />
-    <meta property="og:title" content="ルーシュカ Xエゴサビルダー" />
-    <meta property="og:description" content="ルーシュカ関連のX検索式を作成して、コピーまたはXで直接検索できる静的アプリです。" />
-    <meta property="og:image" content="./img/ogp/rushka.jpg" />
-    <meta property="og:image:alt" content="ルーシュカのイメージ画像" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="ルーシュカ Xエゴサビルダー" />
-    <meta name="twitter:description" content="ルーシュカ関連のX検索式を作成して、コピーまたはXで直接検索できる静的アプリです。" />
-    <meta name="twitter:image" content="./img/ogp/rushka.jpg" />
+    <meta property="og:title" content="X検索式ビルダー" />
+    <meta property="og:description" content="検索語や日付、各種フィルターを指定してXの検索式を作成できます。" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="X検索式ビルダー" />
+    <meta name="twitter:description" content="検索語や日付、各種フィルターを指定してXの検索式を作成できます。" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="shortcut icon" href="./favicon.svg" />
     <link rel="stylesheet" href="styles.css" />
@@ -31,39 +28,37 @@
         </svg>
     </a>
     <main class="container">
-        <h1>ルーシュカ Xエゴサビルダー</h1>
-        <p class="subtitle">Xの検索式を作成して、コピーまたはXで直接検索できます。</p>
+        <h1>X検索式ビルダー</h1>
+        <p class="subtitle">Xの検索式を作成して、コピー・X検索・ブックマークレットに利用できます。</p>
 
         <section class="card">
-            <h2>基本検索式</h2>
-            <div class="readonly">(#ルーシュカ OR ルーシュカ)</div>
+            <h2>検索語</h2>
+            <label for="searchTerms">検索する文字列</label>
+            <input id="searchTerms" type="text" placeholder="例: 猫 OR #猫" autocomplete="off" />
+            <small>語句やXの検索演算子をそのまま入力できます。</small>
         </section>
 
         <section class="card">
             <h2>オプション</h2>
             <div class="options-grid">
-                <label><input type="checkbox" id="mediaOnly" /> メディアのみ（`filter:media`）</label>
-                <label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（`-filter:quote`）</label>
-                <label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（`-filter:retweet`）</label>
-                <label><input type="checkbox" id="excludeReplies" /> リプライを除外（`-filter:replies`）</label>
-                <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（`-from:user`）</label>
+                <label><input type="checkbox" id="mediaOnly" /> メディアのみ（<code>filter:media</code>）</label>
+                <label><input type="checkbox" id="followsOnly" /> フォロー中のユーザーのみ（<code>filter:follows</code>）</label>
+                <label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（<code>-filter:quote</code>）</label>
+                <label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（<code>-filter:retweet</code>）</label>
+                <label><input type="checkbox" id="excludeReplies" /> リプライを除外（<code>-filter:replies</code>）</label>
+                <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（<code>-from:user</code>）</label>
                 <div id="excludeUsersWrap" class="option-input-wrap" aria-hidden="true">
                     <label for="excludeUsers">除外ユーザー（スペース区切り）</label>
                     <input id="excludeUsers" type="text" placeholder="user1 user2" autocomplete="off" disabled />
-                    <small>例: `-from:user1 -from:user2` の形式で追加されます</small>
+                    <small>例: <code>-from:user1 -from:user2</code> の形式で追加されます</small>
                 </div>
-                <label><input type="checkbox" id="enableDateRange" checked /> 日付を指定する（`since:yyyy-mm-dd`）</label>
-                <div id="dateRangeWrap" class="option-input-wrap" aria-hidden="false">
-                    <label for="dateRange">検索期間</label>
-                    <select id="dateRange">
-                        <option value="1d">過去1日</option>
-                        <option value="3d">過去3日</option>
-                        <option value="7d" selected>過去1週間</option>
-                        <option value="14d">過去2週間</option>
-                        <option value="1m">過去1ヶ月</option>
-                        <option value="2m">過去2ヶ月</option>
-                    </select>
-                    <small>本日を基準に開始日を計算して `since:yyyy-mm-dd` を追加します</small>
+                <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> / <code>until:</code>）</label>
+                <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true">
+                    <div class="date-grid">
+                        <div><label for="sinceDate">開始日（since）</label><input id="sinceDate" type="date" disabled /></div>
+                        <div><label for="untilDate">終了日（until）</label><input id="untilDate" type="date" disabled /></div>
+                    </div>
+                    <small>どちらか一方だけでも指定できます。until の日付は検索対象に含まれません。</small>
                 </div>
             </div>
         </section>
@@ -71,11 +66,22 @@
         <section class="card">
             <h2>生成された検索式</h2>
             <textarea id="queryOutput" readonly></textarea>
+            <p id="validationStatus" class="error" role="alert"></p>
             <div class="button-row">
                 <button id="copyButton" type="button">検索式をコピー</button>
                 <a id="openXLink" href="#" target="_blank" rel="noopener noreferrer">Xで開く（最新）</a>
             </div>
             <p id="copyStatus" class="status" aria-live="polite"></p>
+        </section>
+
+        <section class="card">
+            <h2>ブックマークレット</h2>
+            <p>下のリンクをブックマークバーにドラッグすると、現在の条件でX検索を開けます。</p>
+            <a id="bookmarkletLink" class="bookmarklet-link" draggable="true">Xで検索</a>
+            <label for="bookmarkletOutput">ブックマークレット用JavaScript</label>
+            <textarea id="bookmarkletOutput" readonly></textarea>
+            <button id="copyBookmarkletButton" type="button">JavaScriptをコピー</button>
+            <p id="bookmarkletStatus" class="status" aria-live="polite"></p>
         </section>
     </main>
 
