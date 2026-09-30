@@ -21,6 +21,7 @@ const elements = {
     selectedDateRange: document.getElementById("selectedDateRange"),
     clearDateRange: document.getElementById("clearDateRange"),
     mediaOnly: document.getElementById("mediaOnly"),
+    minimumLikes: document.getElementById("minimumLikes"),
     followsOnly: document.getElementById("followsOnly"),
     excludeQuote: document.getElementById("excludeQuote"),
     excludeRetweet: document.getElementById("excludeRetweet"),
@@ -79,6 +80,7 @@ function collectSettings() {
         sinceDate: elements.sinceDate.value,
         untilDate: elements.untilDate.value,
         mediaOnly: elements.mediaOnly.checked,
+        minimumLikes: elements.minimumLikes.value,
         followsOnly: elements.followsOnly.checked,
         excludeQuote: elements.excludeQuote.checked,
         excludeRetweet: elements.excludeRetweet.checked,
@@ -109,6 +111,7 @@ function applySettings(settings) {
     if (shownDate) calendarMonth = monthFromDate(shownDate);
     pendingRangeStart = null;
     elements.mediaOnly.checked = Boolean(settings.mediaOnly);
+    elements.minimumLikes.value = typeof settings.minimumLikes === "string" ? settings.minimumLikes : "";
     elements.followsOnly.checked = Boolean(settings.followsOnly);
     elements.excludeQuote.checked = Boolean(settings.excludeQuote);
     elements.excludeRetweet.checked = Boolean(settings.excludeRetweet);
@@ -311,6 +314,8 @@ function buildQuery(includeDate = true, now = new Date()) {
     }
 
     if (elements.mediaOnly.checked) parts.push("filter:media");
+    const minimumLikes = elements.minimumLikes.value.trim();
+    if (minimumLikes) parts.push(`min_faves:${minimumLikes}`);
     if (elements.followsOnly.checked) parts.push("filter:follows");
     if (elements.excludeQuote.checked) parts.push("-filter:quote");
     if (elements.excludeRetweet.checked) parts.push("-filter:retweet");
@@ -409,12 +414,14 @@ function updateOutput() {
     const until = elements.untilDate.value;
     const invalidRange = elements.enableDateRange.checked && !relative && since && until && since >= until;
     const invalidRelativeDays = relative && !relativeDates;
+    const invalidMinimumLikes = elements.minimumLikes.value.trim() !== "" && (!/^\d+$/.test(elements.minimumLikes.value.trim()) || !Number.isSafeInteger(Number(elements.minimumLikes.value)));
     const missingIncludeUsers = elements.enableIncludeUsers.checked && parseUsernames(elements.includeUsers.value).length === 0;
-    const invalid = !query || invalidRange || missingIncludeUsers || invalidRelativeDays;
+    const invalid = !query || invalidRange || missingIncludeUsers || invalidRelativeDays || invalidMinimumLikes;
     elements.validationStatus.textContent = [
         missingIncludeUsers ? "対象ユーザーを入力してください。" : "",
         invalidRange ? "終了日は開始日より後の日付を指定してください。" : "",
-        invalidRelativeDays ? "過去の日数は有効な正の整数で指定してください。" : ""
+        invalidRelativeDays ? "過去の日数は有効な正の整数で指定してください。" : "",
+        invalidMinimumLikes ? "いいね最小数は0以上の整数で指定してください。" : ""
     ].filter(Boolean).join(" ");
     elements.copyButton.disabled = invalid;
     elements.copyBookmarkletButton.disabled = invalid;
@@ -633,6 +640,7 @@ elements.enableExcludeKeywords.addEventListener("change", updateExcludeKeywordsS
 elements.enableIncludeUsers.addEventListener("change", updateIncludeUsersState);
 
 elements.searchTerms.addEventListener("input", updateOutput);
+elements.minimumLikes.addEventListener("input", updateOutput);
 elements.excludeUsers.addEventListener("input", updateOutput);
 elements.includeUsers.addEventListener("input", updateOutput);
 elements.excludeKeywords.addEventListener("input", updateOutput);

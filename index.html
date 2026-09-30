@@ -37,8 +37,10 @@
             <input id="searchTerms" type="text" placeholder="例: 猫 OR #猫" autocomplete="off" />
             <div class="search-exclude">
                 <label><input type="checkbox" id="enableExcludeKeywords" /> キーワードを除外（<code>-keyword</code>）</label>
-                <div id="excludeKeywordsWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
-                    <textarea id="excludeKeywords" class="keyword-input" aria-label="除外するキーワード（1行に1語句）" placeholder="除外する語句を1行ずつ入力" disabled></textarea>
+                <div id="excludeKeywordsWrap" class="option-input-wrap compact-input disabled" aria-hidden="true"
+                    hidden>
+                    <textarea id="excludeKeywords" class="keyword-input" aria-label="除外するキーワード（1行に1語句）"
+                        placeholder="除外する語句を1行ずつ入力" disabled></textarea>
                 </div>
             </div>
         </section>
@@ -46,25 +48,39 @@
         <section class="card">
             <h2>オプション</h2>
             <div class="options-grid">
-                <div class="option-group single-line-option"><label><input type="checkbox" id="followsOnly" /> フォロー中のみ（<code>filter:follows</code>）</label></div>
-                <div class="option-group"><label><input type="checkbox" id="mediaOnly" /> メディアのみ（<code>filter:media</code>）</label></div>
-                <div class="option-group"><label><input type="checkbox" id="excludeQuote" /> 引用リツイートを除外（<code>-filter:quote</code>）</label></div>
-                <div class="option-group"><label><input type="checkbox" id="excludeRetweet" /> リツイートを除外（<code>-filter:retweet</code>）</label></div>
-                <div class="option-group"><label><input type="checkbox" id="excludeReplies" /> リプライを除外（<code>-filter:replies</code>）</label></div>
+                <div class="option-group single-line-option"><label><input type="checkbox" id="followsOnly" />
+                        フォロー中のみ（<code>filter:follows</code>）</label></div>
+                <div class="option-group"><label><input type="checkbox" id="mediaOnly" />
+                        メディアのみ（<code>filter:media</code>）</label></div>
+                <div class="option-group">
+                    <label for="minimumLikes">いいね最小数（<code>min_faves:</code>）</label>
+                    <input id="minimumLikes" type="number" min="0" step="1" placeholder="例: 100" />
+                </div>
+                <div class="option-group"><label><input type="checkbox" id="excludeQuote" />
+                        引用リツイートを除外（<code>-filter:quote</code>）</label></div>
+                <div class="option-group"><label><input type="checkbox" id="excludeRetweet" />
+                        リツイートを除外（<code>-filter:retweet</code>）</label></div>
+                <div class="option-group"><label><input type="checkbox" id="excludeReplies" />
+                        リプライを除外（<code>-filter:replies</code>）</label></div>
                 <div class="option-group">
                     <label><input type="checkbox" id="enableIncludeUsers" /> 指定ユーザーのみ検索（<code>from:@user</code>）</label>
-                    <div id="includeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
-                        <input id="includeUsers" type="text" aria-label="対象ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力" autocomplete="off" disabled />
+                    <div id="includeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true"
+                        hidden>
+                        <input id="includeUsers" type="text" aria-label="対象ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力"
+                            autocomplete="off" disabled />
                     </div>
                 </div>
                 <div class="option-group single-line-option">
                     <label><input type="checkbox" id="enableExcludeUsers" /> ユーザーを除外（<code>-from:@user</code>）</label>
-                    <div id="excludeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true" hidden>
-                        <input id="excludeUsers" type="text" aria-label="除外ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力" autocomplete="off" disabled />
+                    <div id="excludeUsersWrap" class="option-input-wrap compact-input disabled" aria-hidden="true"
+                        hidden>
+                        <input id="excludeUsers" type="text" aria-label="除外ユーザー（スペース区切り）" placeholder="ユーザー名をスペース区切りで入力"
+                            autocomplete="off" disabled />
                     </div>
                 </div>
                 <div class="option-group date-option">
-                    <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> / <code>until:</code>）</label>
+                    <label><input type="checkbox" id="enableDateRange" /> 日付を指定する（<code>since:</code> /
+                        <code>until:</code>）</label>
                     <div id="dateRangeWrap" class="option-input-wrap disabled" aria-hidden="true" hidden>
                         <label for="dateMode">指定方法</label>
                         <select id="dateMode" disabled>
@@ -80,11 +96,15 @@
                             <input id="sinceDate" type="hidden" />
                             <input id="untilDate" type="hidden" />
                             <div class="calendar-header">
-                                <button id="previousMonth" type="button" class="calendar-nav" aria-label="前の月" disabled>‹</button>
+                                <button id="previousMonth" type="button" class="calendar-nav" aria-label="前の月"
+                                    disabled>‹</button>
                                 <strong id="calendarMonthLabel"></strong>
-                                <button id="nextMonth" type="button" class="calendar-nav" aria-label="次の月" disabled>›</button>
+                                <button id="nextMonth" type="button" class="calendar-nav" aria-label="次の月"
+                                    disabled>›</button>
                             </div>
-                            <div class="calendar-weekdays" aria-hidden="true"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
+                            <div class="calendar-weekdays" aria-hidden="true">
+                                <span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span>
+                            </div>
                             <div id="calendarGrid" class="calendar-grid" aria-label="検索期間のカレンダー"></div>
                             <p id="selectedDateRange" class="selected-date-range" aria-live="polite">期間を選択してください。</p>
                             <button id="clearDateRange" type="button" class="calendar-clear" disabled>期間をクリア</button>
