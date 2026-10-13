@@ -144,10 +144,12 @@ function parseUsernames(value) {
 }
 
 function excludedKeywordFilter(raw) {
-    const keyword = raw.trim().replace(/^-(?=\S)/, "");
-    if (!keyword) return "";
-    if (/^"[^"]+"$/.test(keyword)) return `-${keyword}`;
-    return /\s/.test(keyword) ? `-"${keyword}"` : `-${keyword}`;
+    const value = raw.trim().replace(/^"([\s\S]*)"$/, "$1");
+    return value.split(/\s+/)
+        .map((keyword) => keyword.replace(/^-+/, ""))
+        .filter(Boolean)
+        .map((keyword) => `-${keyword}`)
+        .join(" ");
 }
 
 function parseDate(value) {
