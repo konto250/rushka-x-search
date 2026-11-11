@@ -31,6 +31,19 @@
         <h1>X検索式ビルダー</h1>
         <p class="subtitle">Xの検索式を作成して、コピー・X検索・ブックマークレットに利用できます。</p>
 
+        <details class="card query-import-panel">
+            <summary>検索式からフォームに復元</summary>
+            <p id="queryImportHelp">検索式を貼り付けると、現在のフォームの内容を置き換えます。対応していない条件や、分解すると意味が変わる条件は検索語欄に残します。</p>
+            <label for="queryInput">復元する検索式</label>
+            <textarea id="queryInput" placeholder="例: 猫 filter:media from:@user -犬 since:2026-11-01"
+                aria-describedby="queryImportHelp" spellcheck="false"></textarea>
+            <div class="button-row">
+                <button id="restoreQueryButton" type="button">フォームに復元</button>
+            </div>
+            <p id="queryImportError" class="error" role="alert"></p>
+            <p id="queryImportStatus" class="status" aria-live="polite"></p>
+        </details>
+
         <section class="card">
             <h2>検索語</h2>
             <label for="searchTerms">検索する文字列</label>
@@ -144,6 +157,7 @@
         </details>
     </main>
 
+    <script src="query-parser.js"></script>
     <script src="script.js"></script>
 </body>
 

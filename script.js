@@ -4,6 +4,10 @@ const HISTORY_STORAGE_KEY = "x_search_history";
 const HISTORY_LIMIT = 5;
 
 const elements = {
+    queryInput: document.getElementById("queryInput"),
+    restoreQueryButton: document.getElementById("restoreQueryButton"),
+    queryImportError: document.getElementById("queryImportError"),
+    queryImportStatus: document.getElementById("queryImportStatus"),
     searchTerms: document.getElementById("searchTerms"),
     enableDateRange: document.getElementById("enableDateRange"),
     dateRangeWrap: document.getElementById("dateRangeWrap"),
@@ -133,6 +137,33 @@ function restoreSettingsFromCookie() {
     } catch {
         // Cookie may be manually edited or from an old format; ignore and continue.
     }
+}
+
+function restoreFormSettings(settings) {
+    applySettings(settings);
+    updateDateRangeState();
+    updateIncludeUsersState();
+    updateExcludeUsersState();
+    updateExcludeKeywordsState();
+    updateOutput();
+    saveSettingsToCookie();
+}
+
+function restoreQueryToForm() {
+    elements.queryImportError.textContent = "";
+    elements.queryImportStatus.textContent = "";
+    let settings;
+    try {
+        settings = parseSearchQuery(elements.queryInput.value);
+    } catch (error) {
+        elements.queryImportError.textContent = error.message;
+        elements.queryInput.setAttribute("aria-invalid", "true");
+        elements.queryInput.focus();
+        return;
+    }
+    elements.queryInput.removeAttribute("aria-invalid");
+    restoreFormSettings(settings);
+    elements.queryImportStatus.textContent = "フォームに復元しました。分解できない条件は検索語欄に残しています。日付はカレンダー指定で復元します。";
 }
 
 function sanitizeUsername(raw) {
@@ -311,7 +342,7 @@ function buildQuery(includeDate = true, now = new Date()) {
     const searchTerms = elements.searchTerms.value.trim();
     if (searchTerms) {
         const hasScopedFilters = elements.enableIncludeUsers.checked || (elements.enableExcludeKeywords.checked && elements.excludeKeywords.value.trim()) || elements.enableDateRange.checked;
-        const needsGrouping = hasScopedFilters && /\bOR\b/.test(searchTerms);
+        const needsGrouping = hasScopedFilters && hasTopLevelOr(searchTerms);
         parts.push(needsGrouping ? `(${searchTerms})` : searchTerms);
     }
 
@@ -514,13 +545,7 @@ function renderHistory() {
         restoreButton.type = "button";
         restoreButton.textContent = "条件を再展開";
         restoreButton.addEventListener("click", () => {
-            applySettings(entry.settings);
-            updateDateRangeState();
-            updateIncludeUsersState();
-            updateExcludeUsersState();
-            updateExcludeKeywordsState();
-            updateOutput();
-            saveSettingsToCookie();
+            restoreFormSettings(entry.settings);
             elements.searchTerms.focus();
         });
         const deleteButton = document.createElement("button");
@@ -647,6 +672,12 @@ elements.excludeUsers.addEventListener("input", updateOutput);
 elements.includeUsers.addEventListener("input", updateOutput);
 elements.excludeKeywords.addEventListener("input", updateOutput);
 elements.copyButton.addEventListener("click", copyQuery);
+elements.restoreQueryButton.addEventListener("click", restoreQueryToForm);
+elements.queryInput.addEventListener("input", () => {
+    elements.queryInput.removeAttribute("aria-invalid");
+    elements.queryImportError.textContent = "";
+    elements.queryImportStatus.textContent = "";
+});
 elements.copyBookmarkletButton.addEventListener("click", copyBookmarklet);
 elements.openXLink.addEventListener("click", handleOpenXClick);
 elements.bookmarkletLink.addEventListener("click", saveSettingsToCookie);
